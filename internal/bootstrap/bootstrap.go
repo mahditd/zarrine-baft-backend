@@ -55,6 +55,16 @@ func Start() {
 		materialService,
 	)
 
+	colorRepository := repositories.NewColorRepository(db)
+
+	colorService := services.NewColorService(
+		colorRepository,
+	)
+
+	colorController := controllers.NewColorController(
+		colorService,
+	)
+
 	router := gin.Default()
 
 	routes.SetupRoutes(
@@ -62,6 +72,7 @@ func Start() {
 		authController,
 		categoryController,
 		materialController,
+		colorController,
 		cfg.JWTSecret,
 	)
 

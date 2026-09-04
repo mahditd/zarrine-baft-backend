@@ -12,6 +12,7 @@ func SetupRoutes(
 	authController *controllers.AuthController,
 	categoryController *controllers.CategoryController,
 	materialController *controllers.MaterialController,
+	colorController *controllers.ColorController,
 	jwtSecret string,
 ) {
 
@@ -37,6 +38,12 @@ func SetupRoutes(
 	{
 		material.POST("", materialController.Create)
 		material.GET("", materialController.GetAll)
+	}
+
+	color := router.Group("/api/admin/colors")
+	{
+		color.POST("", colorController.Create)
+		color.GET("", colorController.GetAll)
 	}
 
 	protected := router.Group("/api/protected")
