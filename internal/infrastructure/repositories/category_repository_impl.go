@@ -73,3 +73,20 @@ func (r *CategoryRepositoryImpl) FindAll() ([]models.Category, error) {
 
 	return categories, err
 }
+
+func (r *CategoryRepositoryImpl) FindByID(
+	id uint,
+) (*models.Category, error) {
+
+	var category models.Category
+
+	err := r.db.
+		First(&category, id).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
+}

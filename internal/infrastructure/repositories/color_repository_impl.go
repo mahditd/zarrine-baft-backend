@@ -78,3 +78,20 @@ func (r *ColorRepositoryImpl) FindAll() ([]models.Color, error) {
 
 	return colors, err
 }
+
+func (r *ColorRepositoryImpl) FindByID(
+	id uint,
+) (*models.Color, error) {
+
+	var color models.Color
+
+	err := r.db.
+		First(&color, id).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &color, nil
+}

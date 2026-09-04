@@ -12,5 +12,7 @@ type CategoryRepository interface {
 
 	FindByNameEN(name string) (*models.Category, error)
 
+	FindByID(id uint) (*models.Category, error)
+
 	FindAll() ([]models.Category, error)
 }

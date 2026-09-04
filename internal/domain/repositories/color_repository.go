@@ -12,5 +12,7 @@ type ColorRepository interface {
 
 	FindByNameEN(name string) (*models.Color, error)
 
+	FindByID(id uint) (*models.Color, error)
+
 	FindAll() ([]models.Color, error)
 }

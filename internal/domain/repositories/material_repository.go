@@ -12,5 +12,7 @@ type MaterialRepository interface {
 
 	FindByNameEN(name string) (*models.Material, error)
 
+	FindByID(id uint) (*models.Material, error)
+
 	FindAll() ([]models.Material, error)
 }

@@ -1,0 +1,92 @@
+package repositories
+
+import (
+	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
+	domainRepositories "github.com/mahditd/zarrine-baft-backend/internal/domain/repositories"
+
+	"gorm.io/gorm"
+)
+
+type ProductVariantRepositoryImpl struct {
+	db *gorm.DB
+}
+
+func NewProductVariantRepository(
+	db *gorm.DB,
+) domainRepositories.ProductVariantRepository {
+
+	return &ProductVariantRepositoryImpl{
+		db: db,
+	}
+}
+
+func (r *ProductVariantRepositoryImpl) Create(
+	variant *models.ProductVariant,
+) error {
+
+	return r.db.Create(variant).Error
+}
+
+func (r *ProductVariantRepositoryImpl) FindByProductID(
+	productID uint,
+) ([]models.ProductVariant, error) {
+
+	var variants []models.ProductVariant
+
+	err := r.db.
+		Preload("Color").
+		Where("product_id = ?", productID).
+		Find(&variants).
+		Error
+
+	return variants, err
+}
+
+func (r *ProductVariantRepositoryImpl) FindAll() ([]models.ProductVariant, error) {
+
+	var variants []models.ProductVariant
+
+	err := r.db.
+		Preload("Product").
+		Preload("Color").
+		Find(&variants).
+		Error
+
+	return variants, err
+}
+
+func (r *ProductVariantRepositoryImpl) FindByID(
+	id uint,
+) (*models.ProductVariant, error) {
+
+	var variant models.ProductVariant
+
+	err := r.db.
+		Preload("Color").
+		First(&variant, id).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &variant, nil
+}
+func (r *ProductVariantRepositoryImpl) FindByProductAndColor(
+	productID uint,
+	colorID uint,
+) (*models.ProductVariant, error) {
+
+	var variant models.ProductVariant
+
+	err := r.db.
+		Where("product_id = ? AND color_id = ?", productID, colorID).
+		First(&variant).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &variant, nil
+}

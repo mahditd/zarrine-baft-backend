@@ -65,6 +65,29 @@ func Start() {
 		colorService,
 	)
 
+	productRepository := repositories.NewProductRepository(db)
+
+	productService := services.NewProductService(
+		productRepository,
+		categoryRepository,
+		materialRepository,
+	)
+
+	productController := controllers.NewProductController(
+		productService,
+	)
+	productVariantRepository := repositories.NewProductVariantRepository(db)
+
+	productVariantService := services.NewProductVariantService(
+		productVariantRepository,
+		productRepository,
+		colorRepository,
+	)
+
+	productVariantController := controllers.NewProductVariantController(
+		productVariantService,
+	)
+
 	router := gin.Default()
 
 	routes.SetupRoutes(
@@ -73,6 +96,8 @@ func Start() {
 		categoryController,
 		materialController,
 		colorController,
+		productController,
+		productVariantController,
 		cfg.JWTSecret,
 	)
 

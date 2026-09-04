@@ -77,3 +77,20 @@ func (r *MaterialRepositoryImpl) FindAll() ([]models.Material, error) {
 
 	return materials, err
 }
+
+func (r *MaterialRepositoryImpl) FindByID(
+	id uint,
+) (*models.Material, error) {
+
+	var material models.Material
+
+	err := r.db.
+		First(&material, id).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &material, nil
+}

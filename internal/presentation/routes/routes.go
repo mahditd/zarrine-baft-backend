@@ -13,6 +13,8 @@ func SetupRoutes(
 	categoryController *controllers.CategoryController,
 	materialController *controllers.MaterialController,
 	colorController *controllers.ColorController,
+	productController *controllers.ProductController,
+	productVariantController *controllers.ProductVariantController,
 	jwtSecret string,
 ) {
 
@@ -28,46 +30,29 @@ func SetupRoutes(
 		auth.POST("/login", authController.Login)
 	}
 
-	category := router.Group("/api/admin/categories")
-	{
-		category.POST("", categoryController.Create)
-		category.GET("", categoryController.GetAll)
-	}
-
-	material := router.Group("/api/admin/materials")
-	{
-		material.POST("", materialController.Create)
-		material.GET("", materialController.GetAll)
-	}
-
-	color := router.Group("/api/admin/colors")
-	{
-		color.POST("", colorController.Create)
-		color.GET("", colorController.GetAll)
-	}
-
-	protected := router.Group("/api/protected")
-	protected.Use(
-		middleware.AuthMiddleware(jwtSecret),
-	)
-	{
-		protected.GET("/test", func(c *gin.Context) {
-
-			userID, _ := c.Get("user_id")
-			role, _ := c.Get("role")
-
-			c.JSON(200, gin.H{
-				"user_id": userID,
-				"role":    role,
-			})
-		})
-	}
 	admin := router.Group("/api/admin")
+
 	admin.Use(
 		middleware.AuthMiddleware(jwtSecret),
 		middleware.RequireRole("admin"),
 	)
+
 	{
+		admin.POST("/categories", categoryController.Create)
+		admin.GET("/categories", categoryController.GetAll)
+
+		admin.POST("/materials", materialController.Create)
+		admin.GET("/materials", materialController.GetAll)
+
+		admin.POST("/colors", colorController.Create)
+		admin.GET("/colors", colorController.GetAll)
+
+		admin.POST("/products", productController.Create)
+		admin.GET("/products", productController.GetAll)
+
+		admin.POST("/product-variants", productVariantController.Create)
+		admin.GET("/products/:id/variants", productVariantController.GetByProductID)
+
 		admin.GET("/test", func(c *gin.Context) {
 
 			c.JSON(200, gin.H{
