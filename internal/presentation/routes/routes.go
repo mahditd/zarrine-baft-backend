@@ -10,6 +10,7 @@ import (
 func SetupRoutes(
 	router *gin.Engine,
 	authController *controllers.AuthController,
+	categoryController *controllers.CategoryController,
 	jwtSecret string,
 ) {
 
@@ -23,6 +24,12 @@ func SetupRoutes(
 	{
 		auth.POST("/register", authController.Register)
 		auth.POST("/login", authController.Login)
+	}
+
+	category := router.Group("/api/admin/categories")
+	{
+		category.POST("", categoryController.Create)
+		category.GET("", categoryController.GetAll)
 	}
 
 	protected := router.Group("/api/protected")

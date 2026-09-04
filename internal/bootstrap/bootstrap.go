@@ -31,13 +31,26 @@ func Start() {
 		cfg.JWTExpireHours,
 	)
 
-	authController := controllers.NewAuthController(authService)
+	authController := controllers.NewAuthController(
+		authService,
+	)
+
+	categoryRepository := repositories.NewCategoryRepository(db)
+
+	categoryService := services.NewCategoryService(
+		categoryRepository,
+	)
+
+	categoryController := controllers.NewCategoryController(
+		categoryService,
+	)
 
 	router := gin.Default()
 
 	routes.SetupRoutes(
 		router,
 		authController,
+		categoryController,
 		cfg.JWTSecret,
 	)
 
