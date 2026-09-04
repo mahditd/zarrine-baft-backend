@@ -45,12 +45,23 @@ func Start() {
 		categoryService,
 	)
 
+	materialRepository := repositories.NewMaterialRepository(db)
+
+	materialService := services.NewMaterialService(
+		materialRepository,
+	)
+
+	materialController := controllers.NewMaterialController(
+		materialService,
+	)
+
 	router := gin.Default()
 
 	routes.SetupRoutes(
 		router,
 		authController,
 		categoryController,
+		materialController,
 		cfg.JWTSecret,
 	)
 
