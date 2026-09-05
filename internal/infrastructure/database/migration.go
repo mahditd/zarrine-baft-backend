@@ -24,7 +24,7 @@ func Migrate(db *gorm.DB) {
 	)
 
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("database migration failed: %v", err))
 	}
 
 	fmt.Println("Database migration completed")

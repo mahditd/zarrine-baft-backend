@@ -9,7 +9,7 @@ import (
 type ProductImage struct {
 	ID uint `gorm:"primaryKey"`
 
-	ProductID uint
+	ProductID uint `gorm:"not null"`
 	Product   Product
 
 	ImageURL string `gorm:"not null"`

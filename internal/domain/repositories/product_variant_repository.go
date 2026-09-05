@@ -5,11 +5,17 @@ import (
 )
 
 type ProductVariantRepository interface {
-	Create(variant *models.ProductVariant) error
+	Create(
+		variant *models.ProductVariant,
+	) error
 
-	FindByProductID(productID uint) ([]models.ProductVariant, error)
+	FindByID(
+		id uint,
+	) (*models.ProductVariant, error)
 
-	FindByID(id uint) (*models.ProductVariant, error)
+	FindByProductID(
+		productID uint,
+	) ([]models.ProductVariant, error)
 
 	FindByProductColorAndSize(
 		productID uint,
@@ -17,5 +23,8 @@ type ProductVariantRepository interface {
 		sizeID uint,
 	) (*models.ProductVariant, error)
 
-	FindAll() ([]models.ProductVariant, error)
+	FindAll() (
+		[]models.ProductVariant,
+		error,
+	)
 }

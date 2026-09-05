@@ -41,10 +41,7 @@ func (r *ProductRequestRepositoryImpl) FindAll() (
 
 	var requests []models.ProductRequest
 
-	err := r.db.
-		Preload("Items.ProductVariant.Product").
-		Preload("Items.ProductVariant.Color").
-		Preload("Items.ProductVariant.Size").
+	err := preloadProductRequest(r.db).
 		Find(&requests).
 		Error
 
@@ -57,10 +54,7 @@ func (r *ProductRequestRepositoryImpl) FindByID(
 
 	var request models.ProductRequest
 
-	err := r.db.
-		Preload("Items.ProductVariant.Product").
-		Preload("Items.ProductVariant.Color").
-		Preload("Items.ProductVariant.Size").
+	err := preloadProductRequest(r.db).
 		First(&request, id).
 		Error
 
@@ -69,4 +63,12 @@ func (r *ProductRequestRepositoryImpl) FindByID(
 	}
 
 	return &request, nil
+}
+
+func preloadProductRequest(db *gorm.DB) *gorm.DB {
+
+	return db.
+		Preload("Items.ProductVariant.Product").
+		Preload("Items.ProductVariant.Color").
+		Preload("Items.ProductVariant.Size")
 }

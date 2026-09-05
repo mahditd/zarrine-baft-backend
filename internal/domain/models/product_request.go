@@ -6,15 +6,25 @@ import (
 	"gorm.io/gorm"
 )
 
+type ProductRequestStatus string
+
+const (
+	RequestPending   ProductRequestStatus = "pending"
+	RequestApproved  ProductRequestStatus = "approved"
+	RequestRejected  ProductRequestStatus = "rejected"
+	RequestCompleted ProductRequestStatus = "completed"
+)
+
 type ProductRequest struct {
 	ID uint `gorm:"primaryKey"`
 
 	CustomerName string `gorm:"not null"`
-	Phone        string `gorm:"not null"`
+
+	Phone string `gorm:"not null;index"`
 
 	Description string
 
-	Status string `gorm:"not null;default:'pending'"`
+	Status ProductRequestStatus `gorm:"type:varchar(20);not null;default:'pending'"`
 
 	Items []ProductRequestItem `gorm:"foreignKey:RequestID"`
 

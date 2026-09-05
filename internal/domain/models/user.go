@@ -20,18 +20,17 @@ type User struct {
 
 	Phone string `gorm:"uniqueIndex;not null"`
 
-	Email *string `gorm:"uniqueIndex"`
+	Email *string `gorm:"uniqueIndex;type:varchar(255)"`
 
 	PasswordHash string `gorm:"not null"`
 
-	Role UserRole `gorm:"type:varchar(20);not null"`
+	Role UserRole `gorm:"type:varchar(20);not null;default:'customer'"`
 
-	CompanyName  *string
-	CompanyPhone *string
+	CompanyName  *string `gorm:"type:varchar(100)"`
+	CompanyPhone *string `gorm:"type:varchar(20)"`
 
-	Country string
-
-	Address string
+	Country *string
+	Address *string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -12,17 +12,18 @@ type Product struct {
 	NameFA string `gorm:"not null"`
 	NameEN string `gorm:"not null"`
 
-	CategoryID uint
+	CategoryID uint `gorm:"not null"`
 	Category   Category
 
-	MaterialID uint
+	MaterialID uint `gorm:"not null"`
 	Material   Material
+
+	Images []ProductImage `gorm:"foreignKey:ProductID"`
+
+	Variants []ProductVariant `gorm:"foreignKey:ProductID"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-
-	Images   []ProductImage
-	Variants []ProductVariant
 
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }

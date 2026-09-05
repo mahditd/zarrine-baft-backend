@@ -50,7 +50,7 @@ func (s *ProductRequestService) Create(
 		CustomerName: input.CustomerName,
 		Phone:        input.Phone,
 		Description:  input.Description,
-		Status:       "pending",
+		Status:       models.RequestPending,
 	}
 
 	for _, item := range input.Items {
@@ -116,7 +116,7 @@ func (s *ProductRequestService) UpdateStatus(
 		return err
 	}
 
-	request.Status = status
+	request.Status = models.ProductRequestStatus(status)
 
 	return s.productRequestRepository.Update(request)
 }
@@ -132,12 +132,12 @@ func isValidRequestStatus(
 	status string,
 ) bool {
 
-	switch status {
+	switch models.ProductRequestStatus(status) {
 
-	case "pending",
-		"approved",
-		"rejected",
-		"completed":
+	case models.RequestPending,
+		models.RequestApproved,
+		models.RequestRejected,
+		models.RequestCompleted:
 
 		return true
 	}

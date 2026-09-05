@@ -62,7 +62,7 @@ func FromProductRequest(
 		CustomerName: request.CustomerName,
 		Phone:        request.Phone,
 		Description:  request.Description,
-		Status:       request.Status,
+		Status:       string(request.Status),
 		Items:        items,
 	}
 }

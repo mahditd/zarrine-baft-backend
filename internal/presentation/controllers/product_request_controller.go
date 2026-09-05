@@ -7,6 +7,7 @@ import (
 
 	"github.com/mahditd/zarrine-baft-backend/internal/application/services"
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/dto"
+	"strings"
 )
 
 type ProductRequestController struct {
@@ -153,6 +154,8 @@ func (c *ProductRequestController) UpdateStatus(
 
 		return
 	}
+
+	input.Status = strings.TrimSpace(input.Status)
 
 	err = c.service.UpdateStatus(
 		id,

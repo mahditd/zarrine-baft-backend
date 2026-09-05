@@ -3,6 +3,8 @@ package services
 import (
 	"errors"
 
+	"gorm.io/gorm"
+
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/repositories"
 )
@@ -38,6 +40,11 @@ type CreateProductVariantInput struct {
 func (s *ProductVariantService) Create(
 	input CreateProductVariantInput,
 ) (*models.ProductVariant, error) {
+	if input.ProductID == 0 ||
+		input.ColorID == 0 ||
+		input.SizeID == 0 {
+		return nil, errors.New("invalid variant data")
+	}
 
 	_, err := s.productRepository.FindByID(
 		input.ProductID,
@@ -71,6 +78,10 @@ func (s *ProductVariantService) Create(
 
 	if err == nil && existing != nil {
 		return nil, errors.New("this variant already exists for this product")
+	}
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
 	}
 
 	variant := &models.ProductVariant{

@@ -10,10 +10,10 @@ type ProductRequestItem struct {
 	ID uint `gorm:"primaryKey"`
 
 	RequestID uint
-	Request   ProductRequest `gorm:"foreignKey:RequestID"`
+	Request   *ProductRequest `gorm:"foreignKey:RequestID"`
 
 	ProductVariantID uint
-	ProductVariant   *ProductVariant
+	ProductVariant   *ProductVariant `gorm:"foreignKey:ProductVariantID"`
 
 	Quantity int `gorm:"not null"`
 

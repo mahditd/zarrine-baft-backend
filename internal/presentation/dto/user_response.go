@@ -20,7 +20,8 @@ type UserResponse struct {
 }
 
 func FromUser(user *models.User) UserResponse {
-	return UserResponse{
+
+	response := UserResponse{
 		ID:           user.ID,
 		FullName:     user.FullName,
 		Phone:        user.Phone,
@@ -28,8 +29,18 @@ func FromUser(user *models.User) UserResponse {
 		Role:         string(user.Role),
 		CompanyName:  user.CompanyName,
 		CompanyPhone: user.CompanyPhone,
-		Country:      user.Country,
-		Address:      user.Address,
+		Country:      "",
+		Address:      "",
 		CreatedAt:    user.CreatedAt,
 	}
+
+	if user.Country != nil {
+		response.Country = *user.Country
+	}
+
+	if user.Address != nil {
+		response.Address = *user.Address
+	}
+
+	return response
 }

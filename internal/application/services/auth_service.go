@@ -106,8 +106,13 @@ func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 		user.CompanyPhone = &input.CompanyPhone
 	}
 
-	user.Country = input.Country
-	user.Address = input.Address
+	if input.Country != "" {
+		user.Country = &input.Country
+	}
+
+	if input.Address != "" {
+		user.Address = &input.Address
+	}
 
 	err = s.userRepository.Create(user)
 
