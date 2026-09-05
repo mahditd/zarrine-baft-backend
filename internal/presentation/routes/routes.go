@@ -69,6 +69,15 @@ func SetupRoutes(
 			"/requests",
 			productRequestController.GetAll,
 		)
+		admin.GET(
+			"/requests/:id",
+			productRequestController.GetByID,
+		)
+
+		admin.PATCH(
+			"/requests/:id/status",
+			productRequestController.UpdateStatus,
+		)
 
 		admin.GET("/test", func(c *gin.Context) {
 			c.JSON(200, gin.H{

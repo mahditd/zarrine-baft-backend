@@ -121,6 +121,13 @@ func (s *ProductRequestService) UpdateStatus(
 	return s.productRequestRepository.Update(request)
 }
 
+func (s *ProductRequestService) GetByID(
+	id uint,
+) (*models.ProductRequest, error) {
+
+	return s.productRequestRepository.FindByID(id)
+}
+
 func isValidRequestStatus(
 	status string,
 ) bool {
