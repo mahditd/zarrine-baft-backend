@@ -93,6 +93,17 @@ func Start() {
 		productVariantService,
 	)
 
+	productImageRepository := repositories.NewProductImageRepository(db)
+
+	productImageService := services.NewProductImageService(
+		productImageRepository,
+		productRepository,
+	)
+
+	productImageController := controllers.NewProductImageController(
+		productImageService,
+	)
+
 	router := gin.Default()
 
 	routes.SetupRoutes(
@@ -103,6 +114,7 @@ func Start() {
 		colorController,
 		productController,
 		productVariantController,
+		productImageController,
 		cfg.JWTSecret,
 	)
 

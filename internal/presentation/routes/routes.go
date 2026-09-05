@@ -15,6 +15,7 @@ func SetupRoutes(
 	colorController *controllers.ColorController,
 	productController *controllers.ProductController,
 	productVariantController *controllers.ProductVariantController,
+	productImageController *controllers.ProductImageController,
 	jwtSecret string,
 ) {
 
@@ -46,6 +47,10 @@ func SetupRoutes(
 
 		admin.POST("/colors", colorController.Create)
 		admin.GET("/colors", colorController.GetAll)
+
+		admin.POST("/products/:id/images", productImageController.Create)
+		admin.GET("/products/:id/images", productImageController.GetByProductID)
+		admin.DELETE("/product-images/:id", productImageController.Delete)
 
 		admin.POST("/products", productController.Create)
 		admin.GET("/products", productController.GetAll)
