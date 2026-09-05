@@ -19,12 +19,11 @@ func Start() {
 
 	db := database.Connect(cfg)
 
-	fmt.Println(db)
-
 	database.Migrate(db)
 
 	database.SeedSizes(db)
 
+	// User
 	userRepository := repositories.NewUserRepository(db)
 
 	authService := services.NewAuthService(
@@ -37,6 +36,8 @@ func Start() {
 		authService,
 	)
 
+
+	// Category
 	categoryRepository := repositories.NewCategoryRepository(db)
 
 	categoryService := services.NewCategoryService(
@@ -47,6 +48,8 @@ func Start() {
 		categoryService,
 	)
 
+
+	// Material
 	materialRepository := repositories.NewMaterialRepository(db)
 
 	materialService := services.NewMaterialService(
@@ -57,6 +60,8 @@ func Start() {
 		materialService,
 	)
 
+
+	// Color
 	colorRepository := repositories.NewColorRepository(db)
 
 	colorService := services.NewColorService(
@@ -67,8 +72,12 @@ func Start() {
 		colorService,
 	)
 
+
+	// Size
 	sizeRepository := repositories.NewSizeRepository(db)
 
+
+	// Product
 	productRepository := repositories.NewProductRepository(db)
 
 	productService := services.NewProductService(
@@ -80,6 +89,9 @@ func Start() {
 	productController := controllers.NewProductController(
 		productService,
 	)
+
+
+	// Product Variant
 	productVariantRepository := repositories.NewProductVariantRepository(db)
 
 	productVariantService := services.NewProductVariantService(
@@ -93,6 +105,8 @@ func Start() {
 		productVariantService,
 	)
 
+
+	// Product Image
 	productImageRepository := repositories.NewProductImageRepository(db)
 
 	productImageService := services.NewProductImageService(
@@ -103,6 +117,7 @@ func Start() {
 	productImageController := controllers.NewProductImageController(
 		productImageService,
 	)
+
 
 	router := gin.Default()
 
@@ -118,7 +133,12 @@ func Start() {
 		cfg.JWTSecret,
 	)
 
-	router.Run(
+
+	err := router.Run(
 		fmt.Sprintf(":%s", cfg.AppPort),
 	)
+
+	if err != nil {
+		panic(err)
+	}
 }

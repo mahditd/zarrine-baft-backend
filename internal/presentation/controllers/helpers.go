@@ -2,10 +2,13 @@ package controllers
 
 import "strconv"
 
+func parseUint(value string) (uint, error) {
 
-func parseUint(value string) uint {
+	id, err := strconv.ParseUint(value, 10, 64)
 
-	id, _ := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		return 0, err
+	}
 
-	return uint(id)
+	return uint(id), nil
 }

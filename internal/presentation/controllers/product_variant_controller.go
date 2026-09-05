@@ -7,13 +7,12 @@ import (
 
 	"github.com/mahditd/zarrine-baft-backend/internal/application/services"
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/dto"
+	"strconv"
 )
-
 
 type ProductVariantController struct {
 	productVariantService *services.ProductVariantService
 }
-
 
 func NewProductVariantController(
 	productVariantService *services.ProductVariantService,
@@ -24,14 +23,11 @@ func NewProductVariantController(
 	}
 }
 
-
-
 func (pvc *ProductVariantController) Create(
 	c *gin.Context,
 ) {
 
 	var input services.CreateProductVariantInput
-
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 
@@ -42,10 +38,7 @@ func (pvc *ProductVariantController) Create(
 		return
 	}
 
-
-
 	variant, err := pvc.productVariantService.Create(input)
-
 
 	if err != nil {
 
@@ -56,30 +49,34 @@ func (pvc *ProductVariantController) Create(
 		return
 	}
 
-
-
 	c.JSON(http.StatusCreated, gin.H{
 
 		"message": "product variant created successfully",
 
 		"variant": dto.FromProductVariant(variant),
-
 	})
 }
-
-
 
 func (pvc *ProductVariantController) GetByProductID(
 	c *gin.Context,
 ) {
 
-	productID := c.Param("id")
-
-
-	variantList, err := pvc.productVariantService.GetByProductID(
-		parseUint(productID),
+	productID, err := strconv.ParseUint(
+		c.Param("id"),
+		10,
+		64,
 	)
 
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid product id",
+		})
+		return
+	}
+
+	variantList, err := pvc.productVariantService.GetByProductID(
+		uint(productID),
+	)
 
 	if err != nil {
 
@@ -90,10 +87,7 @@ func (pvc *ProductVariantController) GetByProductID(
 		return
 	}
 
-
-
 	response := make([]dto.ProductVariantResponse, 0)
-
 
 	for _, variant := range variantList {
 
@@ -103,8 +97,6 @@ func (pvc *ProductVariantController) GetByProductID(
 		)
 
 	}
-
-
 
 	c.JSON(http.StatusOK, gin.H{
 		"variants": response,
