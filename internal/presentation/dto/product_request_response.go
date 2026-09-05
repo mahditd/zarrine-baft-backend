@@ -9,6 +9,8 @@ type ProductRequestResponse struct {
 	ID           uint                         `json:"id"`
 	CustomerName string                       `json:"customer_name"`
 	Phone        string                       `json:"phone"`
+	CompanyName  string                       `json:"company_name"`
+	CompanyPhone string                       `json:"company_phone"`
 	Description  string                       `json:"description"`
 	Status       string                       `json:"status"`
 	Items        []ProductRequestItemResponse `json:"items"`
@@ -71,6 +73,8 @@ func FromProductRequest(
 		ID:           request.ID,
 		CustomerName: request.CustomerName,
 		Phone:        request.Phone,
+		CompanyName:  request.CompanyName,
+		CompanyPhone: request.CompanyPhone,
 		Description:  request.Description,
 		Status:       string(request.Status),
 		Items:        items,

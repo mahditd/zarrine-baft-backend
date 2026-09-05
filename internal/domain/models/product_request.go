@@ -23,6 +23,10 @@ type ProductRequest struct {
 
 	Phone string `gorm:"not null;index"`
 
+	CompanyName string `gorm:"not null"`
+
+	CompanyPhone string `gorm:"not null"`
+
 	Description string
 
 	Status ProductRequestStatus `gorm:"type:varchar(20);not null;default:'pending'"`

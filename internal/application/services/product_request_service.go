@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/repositories"
@@ -33,6 +34,10 @@ type CreateProductRequestInput struct {
 
 	Phone string `json:"phone"`
 
+	CompanyName string `json:"company_name"`
+
+	CompanyPhone string `json:"company_phone"`
+
 	Description string `json:"description"`
 
 	Items []CreateProductRequestItemInput `json:"items"`
@@ -46,9 +51,19 @@ func (s *ProductRequestService) Create(
 		return nil, errors.New("request must contain at least one item")
 	}
 
+	if strings.TrimSpace(input.CompanyName) == "" {
+		return nil, errors.New("company name is required")
+	}
+
+	if strings.TrimSpace(input.CompanyPhone) == "" {
+		return nil, errors.New("company phone is required")
+	}
+
 	request := &models.ProductRequest{
 		CustomerName: input.CustomerName,
 		Phone:        input.Phone,
+		CompanyName:  strings.TrimSpace(input.CompanyName),
+		CompanyPhone: strings.TrimSpace(input.CompanyPhone),
 		Description:  input.Description,
 		Status:       models.RequestPending,
 	}
