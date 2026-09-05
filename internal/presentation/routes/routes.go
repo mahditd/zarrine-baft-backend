@@ -37,6 +37,16 @@ func SetupRoutes(
 		productRequestController.Create,
 	)
 
+	router.GET(
+		"/api/products",
+		productController.GetActiveProducts,
+	)
+
+	router.GET(
+		"/api/products/:id",
+		productController.GetActiveByID,
+	)
+
 	admin := router.Group("/api/admin")
 
 	admin.Use(
@@ -60,6 +70,10 @@ func SetupRoutes(
 
 		admin.POST("/products", productController.Create)
 		admin.GET("/products", productController.GetAll)
+		admin.GET("/products/:id", productController.GetByID)
+		admin.PATCH("/products/:id", productController.Update)
+		admin.PATCH("/products/:id/status", productController.UpdateStatus)
+		admin.DELETE("/products/:id", productController.Delete)
 
 		admin.POST("/product-variants", productVariantController.Create)
 		admin.GET("/products/:id/variants", productVariantController.GetByProductID)

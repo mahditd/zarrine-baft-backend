@@ -10,6 +10,8 @@ type ProductResponse struct {
 	NameFA string `json:"name_fa"`
 	NameEN string `json:"name_en"`
 
+	IsActive bool `json:"is_active"`
+
 	Category CategoryResponse `json:"category"`
 	Material MaterialResponse `json:"material"`
 
@@ -44,6 +46,8 @@ func FromProduct(
 
 		NameFA: product.NameFA,
 		NameEN: product.NameEN,
+
+		IsActive: product.IsActive,
 
 		Category: FromCategory(&product.Category),
 		Material: FromMaterial(&product.Material),
