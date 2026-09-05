@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/mahditd/zarrine-baft-backend/internal/application/services"
+	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/dto"
-	"strings"
 )
 
 type ProductRequestController struct {
@@ -59,7 +61,33 @@ func (c *ProductRequestController) GetAll(
 	ctx *gin.Context,
 ) {
 
-	requests, err := c.service.GetAll()
+	page, err := strconv.Atoi(
+		ctx.DefaultQuery("page", "1"),
+	)
+
+	if err != nil || page < 1 {
+
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": "invalid page number",
+			},
+		)
+
+		return
+	}
+
+	limit := 24
+
+	status := strings.TrimSpace(
+		ctx.Query("status"),
+	)
+
+	requests, total, err := c.service.GetPaginated(
+		page,
+		limit,
+		status,
+	)
 
 	if err != nil {
 
@@ -73,10 +101,24 @@ func (c *ProductRequestController) GetAll(
 		return
 	}
 
+	totalPages := int(
+		(total + int64(limit) - 1) /
+			int64(limit),
+	)
+
 	ctx.JSON(
 		http.StatusOK,
 		gin.H{
-			"requests": dto.FromProductRequests(requests),
+
+			"page": page,
+
+			"limit": limit,
+
+			"total_requests": total,
+
+			"total_pages": totalPages,
+
+			"requests": requests,
 		},
 	)
 }
@@ -157,9 +199,21 @@ func (c *ProductRequestController) UpdateStatus(
 
 	input.Status = strings.TrimSpace(input.Status)
 
+	if input.Status == "" {
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": "status is required",
+			},
+		)
+		return
+	}
+
+	status := models.ProductRequestStatus(input.Status)
+
 	err = c.service.UpdateStatus(
 		id,
-		input.Status,
+		status,
 	)
 
 	if err != nil {

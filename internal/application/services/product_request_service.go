@@ -103,20 +103,19 @@ func (s *ProductRequestService) GetAll() (
 
 func (s *ProductRequestService) UpdateStatus(
 	id uint,
-	status string,
+	status models.ProductRequestStatus,
 ) error {
 
-	if !isValidRequestStatus(status) {
+	if !isValidRequestStatus(string(status)) {
 		return errors.New("invalid request status")
 	}
-
 	request, err := s.productRequestRepository.FindByID(id)
 
 	if err != nil {
 		return err
 	}
 
-	request.Status = models.ProductRequestStatus(status)
+	request.Status = status
 
 	return s.productRequestRepository.Update(request)
 }
@@ -135,6 +134,7 @@ func isValidRequestStatus(
 	switch models.ProductRequestStatus(status) {
 
 	case models.RequestPending,
+		models.RequestReviewing,
 		models.RequestApproved,
 		models.RequestRejected,
 		models.RequestCompleted:
@@ -143,4 +143,21 @@ func isValidRequestStatus(
 	}
 
 	return false
+}
+
+func (s *ProductRequestService) GetPaginated(
+	page int,
+	limit int,
+	status string,
+) (
+	[]models.ProductRequest,
+	int64,
+	error,
+) {
+
+	return s.productRequestRepository.FindPaginated(
+		page,
+		limit,
+		status,
+	)
 }

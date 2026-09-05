@@ -10,6 +10,7 @@ type ProductRequestStatus string
 
 const (
 	RequestPending   ProductRequestStatus = "pending"
+	RequestReviewing ProductRequestStatus = "reviewing"
 	RequestApproved  ProductRequestStatus = "approved"
 	RequestRejected  ProductRequestStatus = "rejected"
 	RequestCompleted ProductRequestStatus = "completed"

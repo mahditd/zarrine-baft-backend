@@ -72,3 +72,42 @@ func preloadProductRequest(db *gorm.DB) *gorm.DB {
 		Preload("Items.ProductVariant.Color").
 		Preload("Items.ProductVariant.Size")
 }
+
+func (r *ProductRequestRepositoryImpl) FindPaginated(
+	page int,
+	limit int,
+	status string,
+) ([]models.ProductRequest, int64, error) {
+
+	var requests []models.ProductRequest
+	var total int64
+
+	query := r.db.Model(&models.ProductRequest{})
+
+	if status != "" {
+
+		query = query.Where(
+			"status = ?",
+			status,
+		)
+
+	}
+
+	err := query.Count(&total).Error
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+
+	err = query.
+		Preload("Items").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&requests).
+		Error
+
+	return requests, total, err
+}

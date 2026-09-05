@@ -14,6 +14,16 @@ type ProductRequestRepository interface {
 		error,
 	)
 
+	FindPaginated(
+		page int,
+		limit int,
+		status string,
+	) (
+		[]models.ProductRequest,
+		int64,
+		error,
+	)
+
 	FindByID(
 		id uint,
 	) (*models.ProductRequest, error)
