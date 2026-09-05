@@ -11,7 +11,6 @@ type ProductRepositoryImpl struct {
 	db *gorm.DB
 }
 
-
 func NewProductRepository(
 	db *gorm.DB,
 ) domainRepositories.ProductRepository {
@@ -21,14 +20,12 @@ func NewProductRepository(
 	}
 }
 
-
 func (r *ProductRepositoryImpl) Create(
 	product *models.Product,
 ) error {
 
 	return r.db.Create(product).Error
 }
-
 
 func (r *ProductRepositoryImpl) FindByNameFA(
 	name string,
@@ -48,7 +45,6 @@ func (r *ProductRepositoryImpl) FindByNameFA(
 	return &product, nil
 }
 
-
 func (r *ProductRepositoryImpl) FindByNameEN(
 	name string,
 ) (*models.Product, error) {
@@ -67,7 +63,6 @@ func (r *ProductRepositoryImpl) FindByNameEN(
 	return &product, nil
 }
 
-
 func (r *ProductRepositoryImpl) FindAll() ([]models.Product, error) {
 
 	var products []models.Product
@@ -75,12 +70,14 @@ func (r *ProductRepositoryImpl) FindAll() ([]models.Product, error) {
 	err := r.db.
 		Preload("Category").
 		Preload("Material").
+		Preload("Images").
+		Preload("Variants.Color").
+		Preload("Variants.Size").
 		Find(&products).
 		Error
 
 	return products, err
 }
-
 
 func (r *ProductRepositoryImpl) FindByID(
 	id uint,
@@ -91,6 +88,9 @@ func (r *ProductRepositoryImpl) FindByID(
 	err := r.db.
 		Preload("Category").
 		Preload("Material").
+		Preload("Images").
+		Preload("Variants.Color").
+		Preload("Variants.Size").
 		First(&product, id).
 		Error
 

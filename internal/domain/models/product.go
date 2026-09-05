@@ -13,15 +13,16 @@ type Product struct {
 	NameEN string `gorm:"not null"`
 
 	CategoryID uint
-	Category Category
+	Category   Category
 
 	MaterialID uint
-	Material Material
+	Material   Material
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Images []ProductImage
+	Images   []ProductImage
+	Variants []ProductVariant
 
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }

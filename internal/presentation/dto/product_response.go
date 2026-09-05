@@ -4,7 +4,6 @@ import (
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 )
 
-
 type ProductResponse struct {
 	ID uint `json:"id"`
 
@@ -13,12 +12,32 @@ type ProductResponse struct {
 
 	Category CategoryResponse `json:"category"`
 	Material MaterialResponse `json:"material"`
-}
 
+	Images   []ProductImageResponse   `json:"images"`
+	Variants []ProductVariantResponse `json:"variants"`
+}
 
 func FromProduct(
 	product *models.Product,
 ) ProductResponse {
+
+	images := make([]ProductImageResponse, 0)
+
+	for _, image := range product.Images {
+		images = append(
+			images,
+			FromProductImage(&image),
+		)
+	}
+
+	variants := make([]ProductVariantResponse, 0)
+
+	for _, variant := range product.Variants {
+		variants = append(
+			variants,
+			FromProductVariant(&variant),
+		)
+	}
 
 	return ProductResponse{
 		ID: product.ID,
@@ -28,5 +47,8 @@ func FromProduct(
 
 		Category: FromCategory(&product.Category),
 		Material: FromMaterial(&product.Material),
+
+		Images:   images,
+		Variants: variants,
 	}
 }
