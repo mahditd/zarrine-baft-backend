@@ -11,24 +11,28 @@ type ProductVariantService struct {
 	productVariantRepository repositories.ProductVariantRepository
 	productRepository        repositories.ProductRepository
 	colorRepository          repositories.ColorRepository
+	sizeRepository           repositories.SizeRepository
 }
 
 func NewProductVariantService(
 	productVariantRepository repositories.ProductVariantRepository,
 	productRepository repositories.ProductRepository,
 	colorRepository repositories.ColorRepository,
+	sizeRepository repositories.SizeRepository,
 ) *ProductVariantService {
 
 	return &ProductVariantService{
 		productVariantRepository: productVariantRepository,
 		productRepository:        productRepository,
 		colorRepository:          colorRepository,
+		sizeRepository:           sizeRepository,
 	}
 }
 
 type CreateProductVariantInput struct {
 	ProductID uint `json:"product_id"`
 	ColorID   uint `json:"color_id"`
+	SizeID    uint `json:"size_id"`
 }
 
 func (s *ProductVariantService) Create(
@@ -51,18 +55,28 @@ func (s *ProductVariantService) Create(
 		return nil, errors.New("color not found")
 	}
 
-	existing, err := s.productVariantRepository.FindByProductAndColor(
+	_, err = s.sizeRepository.FindByID(
+		input.SizeID,
+	)
+
+	if err != nil {
+		return nil, errors.New("size not found")
+	}
+
+	existing, err := s.productVariantRepository.FindByProductColorAndSize(
 		input.ProductID,
 		input.ColorID,
+		input.SizeID,
 	)
 
 	if err == nil && existing != nil {
-		return nil, errors.New("this color already exists for this product")
+		return nil, errors.New("this variant already exists for this product")
 	}
 
 	variant := &models.ProductVariant{
 		ProductID: input.ProductID,
 		ColorID:   input.ColorID,
+		SizeID:    input.SizeID,
 	}
 
 	err = s.productVariantRepository.Create(

@@ -35,6 +35,7 @@ func (r *ProductVariantRepositoryImpl) FindByProductID(
 
 	err := r.db.
 		Preload("Color").
+		Preload("Size").
 		Where("product_id = ?", productID).
 		Find(&variants).
 		Error
@@ -49,6 +50,7 @@ func (r *ProductVariantRepositoryImpl) FindAll() ([]models.ProductVariant, error
 	err := r.db.
 		Preload("Product").
 		Preload("Color").
+		Preload("Size").
 		Find(&variants).
 		Error
 
@@ -63,6 +65,7 @@ func (r *ProductVariantRepositoryImpl) FindByID(
 
 	err := r.db.
 		Preload("Color").
+		Preload("Size").
 		First(&variant, id).
 		Error
 
@@ -72,15 +75,21 @@ func (r *ProductVariantRepositoryImpl) FindByID(
 
 	return &variant, nil
 }
-func (r *ProductVariantRepositoryImpl) FindByProductAndColor(
+func (r *ProductVariantRepositoryImpl) FindByProductColorAndSize(
 	productID uint,
 	colorID uint,
+	sizeID uint,
 ) (*models.ProductVariant, error) {
 
 	var variant models.ProductVariant
 
 	err := r.db.
-		Where("product_id = ? AND color_id = ?", productID, colorID).
+		Where(
+			"product_id = ? AND color_id = ? AND size_id = ?",
+			productID,
+			colorID,
+			sizeID,
+		).
 		First(&variant).
 		Error
 

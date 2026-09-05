@@ -11,9 +11,10 @@ type ProductVariantRepository interface {
 
 	FindByID(id uint) (*models.ProductVariant, error)
 
-	FindByProductAndColor(
+	FindByProductColorAndSize(
 		productID uint,
 		colorID uint,
+		sizeID uint,
 	) (*models.ProductVariant, error)
 
 	FindAll() ([]models.ProductVariant, error)

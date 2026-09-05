@@ -23,6 +23,8 @@ func Start() {
 
 	database.Migrate(db)
 
+	database.SeedSizes(db)
+
 	userRepository := repositories.NewUserRepository(db)
 
 	authService := services.NewAuthService(
@@ -65,6 +67,8 @@ func Start() {
 		colorService,
 	)
 
+	sizeRepository := repositories.NewSizeRepository(db)
+
 	productRepository := repositories.NewProductRepository(db)
 
 	productService := services.NewProductService(
@@ -82,6 +86,7 @@ func Start() {
 		productVariantRepository,
 		productRepository,
 		colorRepository,
+		sizeRepository,
 	)
 
 	productVariantController := controllers.NewProductVariantController(
