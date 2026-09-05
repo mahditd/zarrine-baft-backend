@@ -2,6 +2,7 @@ package dto
 
 import (
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
+	"time"
 )
 
 type ProductRequestResponse struct {
@@ -11,6 +12,9 @@ type ProductRequestResponse struct {
 	Description  string                       `json:"description"`
 	Status       string                       `json:"status"`
 	Items        []ProductRequestItemResponse `json:"items"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type ProductRequestItemResponse struct {
@@ -23,6 +27,9 @@ type ProductRequestItemResponse struct {
 	SizeName    string `json:"size_name"`
 
 	Quantity int `json:"quantity"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func FromProductRequest(
@@ -37,6 +44,9 @@ func FromProductRequest(
 			ID:               item.ID,
 			ProductVariantID: item.ProductVariantID,
 			Quantity:         item.Quantity,
+
+			CreatedAt: item.CreatedAt,
+			UpdatedAt: item.UpdatedAt,
 		}
 
 		if item.ProductVariant != nil {
@@ -64,6 +74,9 @@ func FromProductRequest(
 		Description:  request.Description,
 		Status:       string(request.Status),
 		Items:        items,
+
+		CreatedAt: request.CreatedAt,
+		UpdatedAt: request.UpdatedAt,
 	}
 }
 
