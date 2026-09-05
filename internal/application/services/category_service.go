@@ -21,12 +21,10 @@ func NewCategoryService(
 	}
 }
 
-
 type CreateCategoryInput struct {
 	NameFA string
 	NameEN string
 }
-
 
 func (s *CategoryService) Create(
 	input CreateCategoryInput,
@@ -34,7 +32,6 @@ func (s *CategoryService) Create(
 
 	input.NameFA = normalizeName(input.NameFA)
 	input.NameEN = normalizeName(input.NameEN)
-
 
 	if input.NameFA == "" {
 		return nil, errors.New("persian name is required")
@@ -44,7 +41,6 @@ func (s *CategoryService) Create(
 		return nil, errors.New("english name is required")
 	}
 
-
 	existingFA, err := s.categoryRepository.FindByNameFA(
 		input.NameFA,
 	)
@@ -52,7 +48,6 @@ func (s *CategoryService) Create(
 	if err == nil && existingFA != nil {
 		return nil, errors.New("persian category name already exists")
 	}
-
 
 	existingEN, err := s.categoryRepository.FindByNameEN(
 		input.NameEN,
@@ -62,12 +57,10 @@ func (s *CategoryService) Create(
 		return nil, errors.New("english category name already exists")
 	}
 
-
 	category := &models.Category{
 		NameFA: input.NameFA,
 		NameEN: input.NameEN,
 	}
-
 
 	err = s.categoryRepository.Create(category)
 
@@ -75,10 +68,8 @@ func (s *CategoryService) Create(
 		return nil, err
 	}
 
-
 	return category, nil
 }
-
 
 func normalizeName(name string) string {
 

@@ -5,7 +5,6 @@ import (
 )
 
 type ProductImageRepository interface {
-
 	Create(
 		image *models.ProductImage,
 	) error

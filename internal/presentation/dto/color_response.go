@@ -11,7 +11,6 @@ type ColorResponse struct {
 	HexCode string `json:"hex_code"`
 }
 
-
 func FromColor(
 	color *models.Color,
 ) ColorResponse {

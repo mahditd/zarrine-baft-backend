@@ -5,7 +5,6 @@ import (
 )
 
 type ColorRepository interface {
-
 	Create(color *models.Color) error
 
 	FindByNameFA(name string) (*models.Color, error)

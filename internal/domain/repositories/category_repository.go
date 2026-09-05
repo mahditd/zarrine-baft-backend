@@ -5,7 +5,6 @@ import (
 )
 
 type CategoryRepository interface {
-
 	Create(category *models.Category) error
 
 	FindByNameFA(name string) (*models.Category, error)

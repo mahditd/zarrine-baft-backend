@@ -11,7 +11,6 @@ type ColorRepositoryImpl struct {
 	db *gorm.DB
 }
 
-
 func NewColorRepository(
 	db *gorm.DB,
 ) domainRepositories.ColorRepository {
@@ -21,14 +20,12 @@ func NewColorRepository(
 	}
 }
 
-
 func (r *ColorRepositoryImpl) Create(
 	color *models.Color,
 ) error {
 
 	return r.db.Create(color).Error
 }
-
 
 func (r *ColorRepositoryImpl) FindByNameFA(
 	name string,
@@ -48,7 +45,6 @@ func (r *ColorRepositoryImpl) FindByNameFA(
 	return &color, nil
 }
 
-
 func (r *ColorRepositoryImpl) FindByNameEN(
 	name string,
 ) (*models.Color, error) {
@@ -66,7 +62,6 @@ func (r *ColorRepositoryImpl) FindByNameEN(
 
 	return &color, nil
 }
-
 
 func (r *ColorRepositoryImpl) FindAll() ([]models.Color, error) {
 

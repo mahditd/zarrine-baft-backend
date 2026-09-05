@@ -5,7 +5,6 @@ import (
 )
 
 type MaterialRepository interface {
-
 	Create(material *models.Material) error
 
 	FindByNameFA(name string) (*models.Material, error)

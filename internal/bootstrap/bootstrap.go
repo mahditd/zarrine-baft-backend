@@ -36,7 +36,6 @@ func Start() {
 		authService,
 	)
 
-
 	// Category
 	categoryRepository := repositories.NewCategoryRepository(db)
 
@@ -47,7 +46,6 @@ func Start() {
 	categoryController := controllers.NewCategoryController(
 		categoryService,
 	)
-
 
 	// Material
 	materialRepository := repositories.NewMaterialRepository(db)
@@ -60,7 +58,6 @@ func Start() {
 		materialService,
 	)
 
-
 	// Color
 	colorRepository := repositories.NewColorRepository(db)
 
@@ -72,10 +69,8 @@ func Start() {
 		colorService,
 	)
 
-
 	// Size
 	sizeRepository := repositories.NewSizeRepository(db)
-
 
 	// Product
 	productRepository := repositories.NewProductRepository(db)
@@ -89,7 +84,6 @@ func Start() {
 	productController := controllers.NewProductController(
 		productService,
 	)
-
 
 	// Product Variant
 	productVariantRepository := repositories.NewProductVariantRepository(db)
@@ -105,7 +99,6 @@ func Start() {
 		productVariantService,
 	)
 
-
 	// Product Image
 	productImageRepository := repositories.NewProductImageRepository(db)
 
@@ -118,6 +111,17 @@ func Start() {
 		productImageService,
 	)
 
+	// Product Request
+	productRequestRepository := repositories.NewProductRequestRepository(db)
+
+	productRequestService := services.NewProductRequestService(
+		productRequestRepository,
+		productVariantRepository,
+	)
+
+	productRequestController := controllers.NewProductRequestController(
+		productRequestService,
+	)
 
 	router := gin.Default()
 
@@ -130,9 +134,9 @@ func Start() {
 		productController,
 		productVariantController,
 		productImageController,
+		productRequestController,
 		cfg.JWTSecret,
 	)
-
 
 	err := router.Run(
 		fmt.Sprintf(":%s", cfg.AppPort),

@@ -20,14 +20,12 @@ func NewProductImageRepository(
 	}
 }
 
-
 func (r *ProductImageRepositoryImpl) Create(
 	image *models.ProductImage,
 ) error {
 
 	return r.db.Create(image).Error
 }
-
 
 func (r *ProductImageRepositoryImpl) FindByProductID(
 	productID uint,
@@ -42,7 +40,6 @@ func (r *ProductImageRepositoryImpl) FindByProductID(
 
 	return images, err
 }
-
 
 func (r *ProductImageRepositoryImpl) Delete(
 	id uint,

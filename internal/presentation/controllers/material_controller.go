@@ -22,12 +22,10 @@ func NewMaterialController(
 	}
 }
 
-
 type createMaterialRequest struct {
 	NameFA string `json:"name_fa" binding:"required"`
 	NameEN string `json:"name_en" binding:"required"`
 }
-
 
 func (c *MaterialController) Create(ctx *gin.Context) {
 
@@ -42,14 +40,12 @@ func (c *MaterialController) Create(ctx *gin.Context) {
 		return
 	}
 
-
 	material, err := c.materialService.Create(
 		services.CreateMaterialInput{
 			NameFA: request.NameFA,
 			NameEN: request.NameEN,
 		},
 	)
-
 
 	if err != nil {
 
@@ -60,14 +56,11 @@ func (c *MaterialController) Create(ctx *gin.Context) {
 		return
 	}
 
-
 	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "material created successfully",
+		"message":  "material created successfully",
 		"material": dto.FromMaterial(material),
 	})
 }
-
-
 
 func (c *MaterialController) GetAll(ctx *gin.Context) {
 
@@ -82,9 +75,7 @@ func (c *MaterialController) GetAll(ctx *gin.Context) {
 		return
 	}
 
-
 	response := make([]dto.MaterialResponse, 0)
-
 
 	for _, material := range materials {
 
@@ -93,7 +84,6 @@ func (c *MaterialController) GetAll(ctx *gin.Context) {
 			dto.FromMaterial(&material),
 		)
 	}
-
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"materials": response,

@@ -16,6 +16,7 @@ func SetupRoutes(
 	productController *controllers.ProductController,
 	productVariantController *controllers.ProductVariantController,
 	productImageController *controllers.ProductImageController,
+	productRequestController *controllers.ProductRequestController,
 	jwtSecret string,
 ) {
 
@@ -30,6 +31,11 @@ func SetupRoutes(
 		auth.POST("/register", authController.Register)
 		auth.POST("/login", authController.Login)
 	}
+
+	router.POST(
+		"/api/requests",
+		productRequestController.Create,
+	)
 
 	admin := router.Group("/api/admin")
 

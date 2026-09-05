@@ -9,11 +9,9 @@ import (
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/dto"
 )
 
-
 type ProductController struct {
 	productService *services.ProductService
 }
-
 
 func NewProductController(
 	productService *services.ProductService,
@@ -24,14 +22,11 @@ func NewProductController(
 	}
 }
 
-
-
 func (pc *ProductController) Create(
 	c *gin.Context,
 ) {
 
 	var input services.CreateProductInput
-
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 
@@ -42,10 +37,7 @@ func (pc *ProductController) Create(
 		return
 	}
 
-
-
 	product, err := pc.productService.Create(input)
-
 
 	if err != nil {
 
@@ -56,26 +48,19 @@ func (pc *ProductController) Create(
 		return
 	}
 
-
-
 	c.JSON(http.StatusCreated, gin.H{
 
 		"message": "product created successfully",
 
 		"product": dto.FromProduct(product),
-
 	})
 }
-
-
 
 func (pc *ProductController) GetAll(
 	c *gin.Context,
 ) {
 
-
 	products, err := pc.productService.GetAll()
-
 
 	if err != nil {
 
@@ -86,10 +71,7 @@ func (pc *ProductController) GetAll(
 		return
 	}
 
-
-
 	response := make([]dto.ProductResponse, 0)
-
 
 	for _, product := range products {
 
@@ -99,8 +81,6 @@ func (pc *ProductController) GetAll(
 		)
 
 	}
-
-
 
 	c.JSON(http.StatusOK, gin.H{
 		"products": response,

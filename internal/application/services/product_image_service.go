@@ -23,12 +23,10 @@ func NewProductImageService(
 	}
 }
 
-
 type CreateProductImageInput struct {
 	ProductID uint   `json:"product_id"`
 	ImageURL  string `json:"image_url"`
 }
-
 
 func (s *ProductImageService) Create(
 	input CreateProductImageInput,
@@ -42,17 +40,14 @@ func (s *ProductImageService) Create(
 		return nil, errors.New("product not found")
 	}
 
-
 	if input.ImageURL == "" {
 		return nil, errors.New("image url is required")
 	}
-
 
 	image := &models.ProductImage{
 		ProductID: input.ProductID,
 		ImageURL:  input.ImageURL,
 	}
-
 
 	err = s.productImageRepository.Create(
 		image,
@@ -62,10 +57,8 @@ func (s *ProductImageService) Create(
 		return nil, err
 	}
 
-
 	return image, nil
 }
-
 
 func (s *ProductImageService) GetByProductID(
 	productID uint,
@@ -75,7 +68,6 @@ func (s *ProductImageService) GetByProductID(
 		productID,
 	)
 }
-
 
 func (s *ProductImageService) Delete(
 	id uint,

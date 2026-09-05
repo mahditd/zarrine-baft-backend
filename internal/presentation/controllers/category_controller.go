@@ -69,7 +69,6 @@ func (c *CategoryController) GetAll(ctx *gin.Context) {
 		return
 	}
 
-
 	response := make([]dto.CategoryResponse, 0)
 
 	for _, category := range categories {
@@ -79,7 +78,6 @@ func (c *CategoryController) GetAll(ctx *gin.Context) {
 			dto.FromCategory(&category),
 		)
 	}
-
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"categories": response,

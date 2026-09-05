@@ -20,14 +20,12 @@ func NewMaterialRepository(
 	}
 }
 
-
 func (r *MaterialRepositoryImpl) Create(
 	material *models.Material,
 ) error {
 
 	return r.db.Create(material).Error
 }
-
 
 func (r *MaterialRepositoryImpl) FindByNameFA(
 	name string,
@@ -47,7 +45,6 @@ func (r *MaterialRepositoryImpl) FindByNameFA(
 	return &material, nil
 }
 
-
 func (r *MaterialRepositoryImpl) FindByNameEN(
 	name string,
 ) (*models.Material, error) {
@@ -65,7 +62,6 @@ func (r *MaterialRepositoryImpl) FindByNameEN(
 
 	return &material, nil
 }
-
 
 func (r *MaterialRepositoryImpl) FindAll() ([]models.Material, error) {
 

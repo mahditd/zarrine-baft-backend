@@ -21,12 +21,10 @@ func NewMaterialService(
 	}
 }
 
-
 type CreateMaterialInput struct {
 	NameFA string
 	NameEN string
 }
-
 
 func (s *MaterialService) Create(
 	input CreateMaterialInput,
@@ -34,7 +32,6 @@ func (s *MaterialService) Create(
 
 	input.NameFA = normalizeMaterialName(input.NameFA)
 	input.NameEN = normalizeMaterialName(input.NameEN)
-
 
 	if input.NameFA == "" {
 		return nil, errors.New("persian name is required")
@@ -44,7 +41,6 @@ func (s *MaterialService) Create(
 		return nil, errors.New("english name is required")
 	}
 
-
 	existingFA, err := s.materialRepository.FindByNameFA(
 		input.NameFA,
 	)
@@ -52,7 +48,6 @@ func (s *MaterialService) Create(
 	if err == nil && existingFA != nil {
 		return nil, errors.New("persian material name already exists")
 	}
-
 
 	existingEN, err := s.materialRepository.FindByNameEN(
 		input.NameEN,
@@ -62,12 +57,10 @@ func (s *MaterialService) Create(
 		return nil, errors.New("english material name already exists")
 	}
 
-
 	material := &models.Material{
 		NameFA: input.NameFA,
 		NameEN: input.NameEN,
 	}
-
 
 	err = s.materialRepository.Create(material)
 
@@ -75,17 +68,14 @@ func (s *MaterialService) Create(
 		return nil, err
 	}
 
-
 	return material, nil
 }
-
 
 func (s *MaterialService) GetAll() ([]models.Material, error) {
 
 	return s.materialRepository.FindAll()
 
 }
-
 
 func normalizeMaterialName(name string) string {
 

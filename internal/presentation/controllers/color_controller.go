@@ -13,7 +13,6 @@ type ColorController struct {
 	colorService *services.ColorService
 }
 
-
 func NewColorController(
 	colorService *services.ColorService,
 ) *ColorController {
@@ -23,19 +22,15 @@ func NewColorController(
 	}
 }
 
-
 type createColorRequest struct {
 	NameFA  string `json:"name_fa" binding:"required"`
 	NameEN  string `json:"name_en" binding:"required"`
 	HexCode string `json:"hex_code" binding:"required"`
 }
 
-
-
 func (c *ColorController) Create(ctx *gin.Context) {
 
 	var request createColorRequest
-
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 
@@ -46,7 +41,6 @@ func (c *ColorController) Create(ctx *gin.Context) {
 		return
 	}
 
-
 	color, err := c.colorService.Create(
 		services.CreateColorInput{
 			NameFA:  request.NameFA,
@@ -54,7 +48,6 @@ func (c *ColorController) Create(ctx *gin.Context) {
 			HexCode: request.HexCode,
 		},
 	)
-
 
 	if err != nil {
 
@@ -65,19 +58,15 @@ func (c *ColorController) Create(ctx *gin.Context) {
 		return
 	}
 
-
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "color created successfully",
 		"color":   dto.FromColor(color),
 	})
 }
 
-
-
 func (c *ColorController) GetAll(ctx *gin.Context) {
 
 	colors, err := c.colorService.GetAll()
-
 
 	if err != nil {
 
@@ -88,9 +77,7 @@ func (c *ColorController) GetAll(ctx *gin.Context) {
 		return
 	}
 
-
 	response := make([]dto.ColorResponse, 0)
-
 
 	for _, color := range colors {
 
@@ -99,7 +86,6 @@ func (c *ColorController) GetAll(ctx *gin.Context) {
 			dto.FromColor(&color),
 		)
 	}
-
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"colors": response,

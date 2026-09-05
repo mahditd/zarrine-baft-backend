@@ -13,7 +13,7 @@ type ProductVariantResponse struct {
 	ID        uint          `json:"id"`
 	ProductID uint          `json:"product_id"`
 	Color     ColorResponse `json:"color"`
-	Size      *SizeResponse  `json:"size"`
+	Size      *SizeResponse `json:"size"`
 }
 
 func FromProductVariant(
