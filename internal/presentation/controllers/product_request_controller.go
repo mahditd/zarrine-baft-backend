@@ -118,7 +118,7 @@ func (c *ProductRequestController) GetAll(
 
 			"total_pages": totalPages,
 
-			"requests": requests,
+			"requests": dto.FromProductRequests(requests),
 		},
 	)
 }

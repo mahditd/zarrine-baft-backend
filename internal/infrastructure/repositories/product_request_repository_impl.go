@@ -102,7 +102,9 @@ func (r *ProductRequestRepositoryImpl) FindPaginated(
 	offset := (page - 1) * limit
 
 	err = query.
-		Preload("Items").
+		Preload("Items.ProductVariant.Product").
+		Preload("Items.ProductVariant.Color").
+		Preload("Items.ProductVariant.Size").
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
