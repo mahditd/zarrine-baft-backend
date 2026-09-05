@@ -53,3 +53,29 @@ func (c *ProductRequestController) Create(
 		"request": dto.FromProductRequest(request),
 	})
 }
+
+func (c *ProductRequestController) GetAll(
+	ctx *gin.Context,
+) {
+
+	requests, err := c.service.GetAll()
+
+	if err != nil {
+
+		ctx.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	ctx.JSON(
+		http.StatusOK,
+		gin.H{
+			"requests": dto.FromProductRequests(requests),
+		},
+	)
+}

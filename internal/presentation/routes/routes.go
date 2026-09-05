@@ -64,12 +64,16 @@ func SetupRoutes(
 		admin.POST("/product-variants", productVariantController.Create)
 		admin.GET("/products/:id/variants", productVariantController.GetByProductID)
 
-		admin.GET("/test", func(c *gin.Context) {
+		// Product Requests
+		admin.GET(
+			"/requests",
+			productRequestController.GetAll,
+		)
 
+		admin.GET("/test", func(c *gin.Context) {
 			c.JSON(200, gin.H{
 				"message": "welcome admin",
 			})
-
 		})
 	}
 

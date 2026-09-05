@@ -13,7 +13,7 @@ type ProductRequestItem struct {
 	Request   ProductRequest `gorm:"foreignKey:RequestID"`
 
 	ProductVariantID uint
-	ProductVariant   ProductVariant
+	ProductVariant   *ProductVariant
 
 	Quantity int `gorm:"not null"`
 

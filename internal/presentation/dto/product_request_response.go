@@ -39,16 +39,19 @@ func FromProductRequest(
 			Quantity:         item.Quantity,
 		}
 
-		if item.ProductVariant.Product != nil {
-			response.ProductName = item.ProductVariant.Product.NameEN
-		}
+		if item.ProductVariant != nil {
 
-		if item.ProductVariant.Color != nil {
-			response.ColorName = item.ProductVariant.Color.NameEN
-		}
+			if item.ProductVariant.Product != nil {
+				response.ProductName = item.ProductVariant.Product.NameEN
+			}
 
-		if item.ProductVariant.Size != nil {
-			response.SizeName = item.ProductVariant.Size.Name
+			if item.ProductVariant.Color != nil {
+				response.ColorName = item.ProductVariant.Color.NameEN
+			}
+
+			if item.ProductVariant.Size != nil {
+				response.SizeName = item.ProductVariant.Size.Name
+			}
 		}
 
 		items = append(items, response)
@@ -62,4 +65,24 @@ func FromProductRequest(
 		Status:       request.Status,
 		Items:        items,
 	}
+}
+
+func FromProductRequests(
+	requests []models.ProductRequest,
+) []ProductRequestResponse {
+
+	response := make(
+		[]ProductRequestResponse,
+		0,
+	)
+
+	for _, request := range requests {
+
+		response = append(
+			response,
+			FromProductRequest(&request),
+		)
+	}
+
+	return response
 }

@@ -55,6 +55,10 @@ func (s *ProductRequestService) Create(
 
 	for _, item := range input.Items {
 
+		if item.Quantity <= 0 {
+			return nil, errors.New("quantity must be greater than zero")
+		}
+
 		_, err := s.productVariantRepository.FindByID(
 			item.ProductVariantID,
 		)
@@ -87,4 +91,49 @@ func (s *ProductRequestService) Create(
 	}
 
 	return createdRequest, nil
+}
+
+func (s *ProductRequestService) GetAll() (
+	[]models.ProductRequest,
+	error,
+) {
+
+	return s.productRequestRepository.FindAll()
+}
+
+func (s *ProductRequestService) UpdateStatus(
+	id uint,
+	status string,
+) error {
+
+	if !isValidRequestStatus(status) {
+		return errors.New("invalid request status")
+	}
+
+	request, err := s.productRequestRepository.FindByID(id)
+
+	if err != nil {
+		return err
+	}
+
+	request.Status = status
+
+	return s.productRequestRepository.Update(request)
+}
+
+func isValidRequestStatus(
+	status string,
+) bool {
+
+	switch status {
+
+	case "pending",
+		"approved",
+		"rejected",
+		"completed":
+
+		return true
+	}
+
+	return false
 }
