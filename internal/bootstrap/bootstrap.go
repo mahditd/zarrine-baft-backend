@@ -131,6 +131,16 @@ func Start() {
 		productRequestService,
 	)
 
+	// Dashboard
+	dashboardService := services.NewDashboardService(
+		productRepository,
+		productRequestRepository,
+	)
+
+	dashboardController := controllers.NewDashboardController(
+		dashboardService,
+	)
+
 	router := gin.Default()
 
 	routes.SetupRoutes(
@@ -143,6 +153,7 @@ func Start() {
 		productVariantController,
 		productImageController,
 		productRequestController,
+		dashboardController,
 		cfg.JWTSecret,
 	)
 

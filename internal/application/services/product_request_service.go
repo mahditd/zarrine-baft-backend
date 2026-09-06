@@ -215,6 +215,7 @@ func (s *ProductRequestService) GetPaginated(
 	page int,
 	limit int,
 	status string,
+	search string,
 ) (
 	[]models.ProductRequest,
 	int64,
@@ -224,6 +225,7 @@ func (s *ProductRequestService) GetPaginated(
 		page,
 		limit,
 		status,
+		search,
 	)
 }
 

@@ -35,4 +35,8 @@ type ProductRepository interface {
 	Reorder(productIDs []uint) error
 
 	Delete(product *models.Product) error
+
+	GetActiveCount() (int64, error)
+
+	GetInactiveCount() (int64, error)
 }

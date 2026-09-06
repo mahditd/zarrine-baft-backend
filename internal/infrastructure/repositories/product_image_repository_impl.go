@@ -24,13 +24,63 @@ func (r *ProductImageRepositoryImpl) Create(
 	image *models.ProductImage,
 ) error {
 
-	return r.db.Select(
-		"ProductID",
-		"ImageURL",
-		"FilePath",
-		"DisplayOrder",
-		"IsCover",
-	).Create(image).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+
+		var count int64
+
+		err := tx.Model(&models.ProductImage{}).
+			Where("product_id = ?", image.ProductID).
+			Count(&count).
+			Error
+
+		if err != nil {
+			return err
+		}
+
+		// First image becomes cover
+		if count == 0 {
+			image.DisplayOrder = 1
+			image.IsCover = true
+		} else {
+
+			// Push existing images down
+			err = tx.Model(&models.ProductImage{}).
+				Where("product_id = ?", image.ProductID).
+				UpdateColumn(
+					"display_order",
+					gorm.Expr("display_order + 1"),
+				).
+				Error
+
+			if err != nil {
+				return err
+			}
+
+			image.DisplayOrder = 1
+			image.IsCover = true
+
+			// Remove old cover
+			err = tx.Model(&models.ProductImage{}).
+				Where("product_id = ?", image.ProductID).
+				UpdateColumn(
+					"is_cover",
+					false,
+				).
+				Error
+
+			if err != nil {
+				return err
+			}
+		}
+
+		return tx.Select(
+			"ProductID",
+			"ImageURL",
+			"FilePath",
+			"DisplayOrder",
+			"IsCover",
+		).Create(image).Error
+	})
 }
 
 func (r *ProductImageRepositoryImpl) FindByID(
@@ -114,7 +164,21 @@ func (r *ProductImageRepositoryImpl) Delete(
 				First(&first).
 				Error
 			if err == nil {
-				_ = tx.Model(&first).Update("is_cover", true).Error
+
+				if err := tx.Model(&models.ProductImage{}).
+					Where("product_id = ?", productID).
+					Update("is_cover", false).
+					Error; err != nil {
+					return err
+				}
+
+				if err := tx.Model(&first).
+					Updates(map[string]interface{}{
+						"is_cover":      true,
+						"display_order": 1,
+					}).Error; err != nil {
+					return err
+				}
 			}
 		}
 

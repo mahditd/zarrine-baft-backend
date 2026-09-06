@@ -93,6 +93,7 @@ func (r *ProductRequestRepositoryImpl) FindPaginated(
 	page int,
 	limit int,
 	status string,
+	search string,
 ) ([]models.ProductRequest, int64, error) {
 
 	var requests []models.ProductRequest
@@ -101,12 +102,36 @@ func (r *ProductRequestRepositoryImpl) FindPaginated(
 	query := r.db.Model(&models.ProductRequest{})
 
 	if status != "" {
-
 		query = query.Where(
-			"status = ?",
+			"product_requests.status = ?",
 			status,
 		)
+	}
 
+	if search != "" {
+
+		searchPattern := "%" + search + "%"
+
+		query = query.
+			Joins(
+				"JOIN users ON users.id = product_requests.user_id",
+			).
+			Where(
+				`
+			product_requests.request_number ILIKE ?
+			OR product_requests.customer_name ILIKE ?
+			OR product_requests.company_name ILIKE ?
+			OR product_requests.phone ILIKE ?
+			OR product_requests.company_phone ILIKE ?
+			OR users.phone ILIKE ?
+			`,
+				searchPattern,
+				searchPattern,
+				searchPattern,
+				searchPattern,
+				searchPattern,
+				searchPattern,
+			)
 	}
 
 	err := query.Count(&total).Error
@@ -199,3 +224,32 @@ func (r *ProductRequestRepositoryImpl) GetLatestRequestNumber(
 	return latest.RequestNumber, nil
 }
 
+func (r *ProductRequestRepositoryImpl) GetNewRequestsCount() (int64, error) {
+
+	var count int64
+
+	err := r.db.
+		Model(&models.ProductRequest{}).
+		Where("status = ?", "new").
+		Count(&count).
+		Error
+
+	return count, err
+}
+
+func (r *ProductRequestRepositoryImpl) FindLatest(
+	limit int,
+) ([]models.ProductRequest, error) {
+
+	var requests []models.ProductRequest
+
+	err := r.db.
+		Preload("User").
+		Preload("Items").
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&requests).
+		Error
+
+	return requests, err
+}

@@ -290,3 +290,28 @@ func (r *ProductRepositoryImpl) Reorder(productIDs []uint) error {
 	})
 }
 
+func (r *ProductRepositoryImpl) GetActiveCount() (int64, error) {
+
+	var count int64
+
+	err := r.db.
+		Model(&models.Product{}).
+		Where("is_active = ?", true).
+		Count(&count).
+		Error
+
+	return count, err
+}
+
+func (r *ProductRepositoryImpl) GetInactiveCount() (int64, error) {
+
+	var count int64
+
+	err := r.db.
+		Model(&models.Product{}).
+		Where("is_active = ?", false).
+		Count(&count).
+		Error
+
+	return count, err
+}

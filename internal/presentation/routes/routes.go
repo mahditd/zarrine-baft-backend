@@ -17,6 +17,7 @@ func SetupRoutes(
 	productVariantController *controllers.ProductVariantController,
 	productImageController *controllers.ProductImageController,
 	productRequestController *controllers.ProductRequestController,
+	dashboardController *controllers.DashboardController,
 	jwtSecret string,
 ) {
 
@@ -91,6 +92,11 @@ func SetupRoutes(
 
 		admin.POST("/product-variants", productVariantController.Create)
 		admin.GET("/products/:id/variants", productVariantController.GetByProductID)
+
+		admin.GET(
+			"/dashboard",
+			dashboardController.GetDashboard,
+		)
 
 		// Product Requests
 		admin.GET(

@@ -150,6 +150,18 @@ func (s *ProductImageService) Delete(
 		return errors.New("image not found")
 	}
 
+	count, err := s.productImageRepository.CountByProductID(
+		image.ProductID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if count <= 1 {
+		return errors.New("product must have at least one image")
+	}
+
 	if image.FilePath != "" {
 
 		err := s.storage.Delete(

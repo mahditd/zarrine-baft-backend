@@ -136,6 +136,14 @@ func (m *mockProductRepo) Delete(product *models.Product) error {
 	return nil
 }
 
+func (m *mockProductRepo) GetActiveCount() (int64, error) {
+	return 0, nil
+}
+
+func (m *mockProductRepo) GetInactiveCount() (int64, error) {
+	return 0, nil
+}
+
 func TestProductService_ProductCodeValidation(t *testing.T) {
 	prodRepo := &mockProductRepo{products: make(map[uint]*models.Product)}
 	catRepo := &mockCategoryRepo{categories: make(map[uint]*models.Category)}

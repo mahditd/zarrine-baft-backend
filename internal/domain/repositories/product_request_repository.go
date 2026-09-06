@@ -18,6 +18,7 @@ type ProductRequestRepository interface {
 		page int,
 		limit int,
 		status string,
+		search string,
 	) (
 		[]models.ProductRequest,
 		int64,
@@ -54,4 +55,8 @@ type ProductRequestRepository interface {
 	GetLatestRequestNumber(
 		year int,
 	) (string, error)
+
+	GetNewRequestsCount() (int64, error)
+
+	FindLatest(limit int) ([]models.ProductRequest, error)
 }

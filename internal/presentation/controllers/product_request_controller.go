@@ -196,9 +196,21 @@ func (c *ProductRequestController) GetAll(
 	}
 
 	limit := 24
-	status := strings.TrimSpace(ctx.Query("status"))
 
-	requests, total, err := c.service.GetPaginated(page, limit, status)
+	status := strings.TrimSpace(
+		ctx.Query("status"),
+	)
+
+	search := strings.TrimSpace(
+		ctx.Query("search"),
+	)
+
+	requests, total, err := c.service.GetPaginated(
+		page,
+		limit,
+		status,
+		search,
+	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -297,4 +309,3 @@ func (c *ProductRequestController) UpdateStatus(
 		"message": "request status updated successfully",
 	})
 }
-

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+	"strings"
 
 	"github.com/mahditd/zarrine-baft-backend/internal/application/services"
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
@@ -102,6 +103,18 @@ func (m *mockVariantRepo) Delete(
 	return nil
 }
 
+func (m *mockRequestRepo) FindLatest(
+	limit int,
+) ([]models.ProductRequest, error) {
+
+	return []models.ProductRequest{}, nil
+}
+
+func (m *mockRequestRepo) GetNewRequestsCount() (int64, error) {
+
+	return 0, nil
+}
+
 func (m *mockVariantRepo) Update(
 	variant *models.ProductVariant,
 ) error {
@@ -123,8 +136,40 @@ func (m *mockRequestRepo) FindAll() ([]models.ProductRequest, error) {
 	return res, nil
 }
 
-func (m *mockRequestRepo) FindPaginated(page, limit int, status string) ([]models.ProductRequest, int64, error) {
-	return nil, 0, nil
+func (m *mockRequestRepo) FindPaginated(
+	page int,
+	limit int,
+	status string,
+	search string,
+) ([]models.ProductRequest, int64, error) {
+
+	res := make([]models.ProductRequest, 0)
+
+	for _, r := range m.requests {
+
+		// status filter
+		if status != "" && string(r.Status) != status {
+			continue
+		}
+
+		// search filter
+		if search != "" {
+			search = strings.ToLower(search)
+
+			matched :=
+				strings.Contains(strings.ToLower(r.RequestNumber), search) ||
+					strings.Contains(strings.ToLower(r.CustomerName), search) ||
+					strings.Contains(strings.ToLower(r.CompanyName), search)
+
+			if !matched {
+				continue
+			}
+		}
+
+		res = append(res, *r)
+	}
+
+	return res, int64(len(res)), nil
 }
 
 func (m *mockRequestRepo) FindByUserIDPaginated(userID uint, page, limit int) ([]models.ProductRequest, int64, error) {
