@@ -103,3 +103,75 @@ func (pvc *ProductVariantController) GetByProductID(
 	})
 
 }
+
+func (pvc *ProductVariantController) Update(
+	c *gin.Context,
+) {
+
+	id, err := strconv.ParseUint(
+		c.Param("id"),
+		10,
+		64,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid variant id",
+		})
+		return
+	}
+
+	var input services.UpdateProductVariantInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	variant, err := pvc.productVariantService.Update(uint(id), input)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "product variant updated successfully",
+		"variant": dto.FromProductVariant(variant),
+	})
+}
+
+func (pvc *ProductVariantController) Delete(
+	c *gin.Context,
+) {
+
+	id, err := strconv.ParseUint(
+		c.Param("id"),
+		10,
+		64,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid variant id",
+		})
+		return
+	}
+
+	err = pvc.productVariantService.Delete(uint(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "product variant deleted successfully",
+	})
+}

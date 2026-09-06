@@ -13,21 +13,24 @@ import (
 var productCodeRegex = regexp.MustCompile(`^[0-9]{3}$`)
 
 type ProductService struct {
-	productRepository  repositories.ProductRepository
-	categoryRepository repositories.CategoryRepository
-	materialRepository repositories.MaterialRepository
+	productRepository      repositories.ProductRepository
+	categoryRepository     repositories.CategoryRepository
+	materialRepository     repositories.MaterialRepository
+	productImageRepository repositories.ProductImageRepository
 }
 
 func NewProductService(
 	productRepository repositories.ProductRepository,
 	categoryRepository repositories.CategoryRepository,
 	materialRepository repositories.MaterialRepository,
+	productImageRepository repositories.ProductImageRepository,
 ) *ProductService {
 
 	return &ProductService{
-		productRepository:  productRepository,
-		categoryRepository: categoryRepository,
-		materialRepository: materialRepository,
+		productRepository:      productRepository,
+		categoryRepository:     categoryRepository,
+		materialRepository:     materialRepository,
+		productImageRepository: productImageRepository,
 	}
 }
 
@@ -163,6 +166,17 @@ func (s *ProductService) UpdateStatus(
 	product, err := s.productRepository.FindByID(id)
 	if err != nil {
 		return errors.New("product not found")
+	}
+
+	// SRS 5.1: minimum 1 image per product. Block activation without images.
+	if isActive && s.productImageRepository != nil {
+		count, err := s.productImageRepository.CountByProductID(id)
+		if err != nil {
+			return err
+		}
+		if count < 1 {
+			return errors.New("product must have at least one image to be activated")
+		}
 	}
 
 	product.IsActive = isActive

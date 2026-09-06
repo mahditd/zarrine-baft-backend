@@ -105,7 +105,11 @@ func (r *ProductVariantRepositoryImpl) Update(
 	variant *models.ProductVariant,
 ) error {
 
-	return r.db.Save(variant).Error
+	return r.db.Model(&models.ProductVariant{}).Where("id = ?", variant.ID).Updates(map[string]interface{}{
+		"color_id": variant.ColorID,
+		"size_id":  variant.SizeID,
+		"price":    variant.Price,
+	}).Error
 }
 
 func (r *ProductVariantRepositoryImpl) Delete(

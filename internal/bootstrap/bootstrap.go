@@ -76,10 +76,14 @@ func Start() {
 	// Product
 	productRepository := repositories.NewProductRepository(db)
 
+	// Product Image repository is needed by ProductService (min-1 image on activate).
+	productImageRepository := repositories.NewProductImageRepository(db)
+
 	productService := services.NewProductService(
 		productRepository,
 		categoryRepository,
 		materialRepository,
+		productImageRepository,
 	)
 
 	productController := controllers.NewProductController(
@@ -104,9 +108,7 @@ func Start() {
 		cfg.UploadPath + "/products",
 	)
 
-	// Product Image
-	productImageRepository := repositories.NewProductImageRepository(db)
-
+	// Product Image (repository already created above for ProductService)
 	productImageService := services.NewProductImageService(
 		productImageRepository,
 		productRepository,

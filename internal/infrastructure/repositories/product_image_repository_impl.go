@@ -37,40 +37,25 @@ func (r *ProductImageRepositoryImpl) Create(
 			return err
 		}
 
-		// First image becomes cover
+		// First image becomes cover; later uploads append at the end
+		// so they never steal the cover (SRS 5.3: admin controls order).
 		if count == 0 {
 			image.DisplayOrder = 1
 			image.IsCover = true
 		} else {
-
-			// Push existing images down
+			var maxOrder int
 			err = tx.Model(&models.ProductImage{}).
 				Where("product_id = ?", image.ProductID).
-				UpdateColumn(
-					"display_order",
-					gorm.Expr("display_order + 1"),
-				).
+				Select("COALESCE(MAX(display_order), 0)").
+				Scan(&maxOrder).
 				Error
 
 			if err != nil {
 				return err
 			}
 
-			image.DisplayOrder = 1
-			image.IsCover = true
-
-			// Remove old cover
-			err = tx.Model(&models.ProductImage{}).
-				Where("product_id = ?", image.ProductID).
-				UpdateColumn(
-					"is_cover",
-					false,
-				).
-				Error
-
-			if err != nil {
-				return err
-			}
+			image.DisplayOrder = maxOrder + 1
+			image.IsCover = false
 		}
 
 		return tx.Select(

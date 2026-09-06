@@ -54,7 +54,11 @@ type LoginResult struct {
 
 func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 
-	input.Phone = utils.NormalizePhone(input.Phone)
+	normalizedPhone, err := utils.NormalizePhone(input.Phone)
+	if err != nil {
+		return nil, errors.New("invalid phone number")
+	}
+	input.Phone = normalizedPhone
 
 	existingUser, err := s.userRepository.FindByPhone(input.Phone)
 
@@ -104,7 +108,11 @@ func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 	}
 
 	if input.CompanyPhone != "" {
-		user.CompanyPhone = &input.CompanyPhone
+		normCompany, err := utils.NormalizePhone(input.CompanyPhone)
+		if err != nil {
+			return nil, errors.New("invalid company phone number")
+		}
+		user.CompanyPhone = &normCompany
 	}
 
 	if input.Country != "" {
@@ -126,7 +134,11 @@ func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 
 func (s *AuthService) Login(input LoginInput) (*LoginResult, error) {
 
-	input.Phone = utils.NormalizePhone(input.Phone)
+	normalizedPhone, err := utils.NormalizePhone(input.Phone)
+	if err != nil {
+		return nil, errors.New("invalid phone or password")
+	}
+	input.Phone = normalizedPhone
 
 	user, err := s.userRepository.FindByPhone(input.Phone)
 
@@ -210,7 +222,10 @@ func (s *AuthService) UpdateProfile(
 
 	companyPhone := strings.TrimSpace(input.CompanyPhone)
 	if companyPhone != "" {
-		norm := utils.NormalizePhone(companyPhone)
+		norm, err := utils.NormalizePhone(companyPhone)
+		if err != nil {
+			return nil, errors.New("invalid company phone number")
+		}
 		user.CompanyPhone = &norm
 	}
 

@@ -38,6 +38,12 @@ type CreateProductVariantInput struct {
 	Price     int64 `json:"price"`
 }
 
+type UpdateProductVariantInput struct {
+	ColorID uint  `json:"color_id"`
+	SizeID  uint  `json:"size_id"`
+	Price   int64 `json:"price"`
+}
+
 func (s *ProductVariantService) Create(
 	input CreateProductVariantInput,
 ) (*models.ProductVariant, error) {
@@ -119,4 +125,77 @@ func (s *ProductVariantService) GetByProductID(
 	return s.productVariantRepository.FindByProductID(
 		productID,
 	)
+}
+
+func (s *ProductVariantService) Update(
+	id uint,
+	input UpdateProductVariantInput,
+) (*models.ProductVariant, error) {
+	variant, err := s.productVariantRepository.FindByID(id)
+	if err != nil {
+		return nil, errors.New("product variant not found")
+	}
+
+	newColorID := variant.ColorID
+	if input.ColorID != 0 {
+		_, err = s.colorRepository.FindByID(input.ColorID)
+		if err != nil {
+			return nil, errors.New("color not found")
+		}
+		newColorID = input.ColorID
+	}
+
+	newSizeID := variant.SizeID
+	if input.SizeID != 0 {
+		_, err = s.sizeRepository.FindByID(input.SizeID)
+		if err != nil {
+			return nil, errors.New("size not found")
+		}
+		newSizeID = input.SizeID
+	}
+
+	if input.Price != 0 {
+		if input.Price <= 0 {
+			return nil, errors.New("price must be greater than 0")
+		}
+		variant.Price = input.Price
+	}
+
+	if newColorID != variant.ColorID || newSizeID != variant.SizeID {
+		existing, err := s.productVariantRepository.FindByProductColorAndSize(
+			variant.ProductID,
+			newColorID,
+			newSizeID,
+		)
+		if err == nil && existing != nil && existing.ID != variant.ID {
+			return nil, errors.New("this variant already exists for this product")
+		}
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		variant.ColorID = newColorID
+		variant.SizeID = newSizeID
+	}
+
+	if input.ColorID == 0 && input.SizeID == 0 && input.Price == 0 {
+		return nil, errors.New("nothing to update")
+	}
+
+	err = s.productVariantRepository.Update(variant)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.productVariantRepository.FindByID(variant.ID)
+}
+
+func (s *ProductVariantService) Delete(
+	id uint,
+) error {
+	variant, err := s.productVariantRepository.FindByID(id)
+	if err != nil {
+		return errors.New("product variant not found")
+	}
+
+	return s.productVariantRepository.Delete(variant)
 }

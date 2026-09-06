@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/repositories"
@@ -39,6 +40,44 @@ type UploadProductImageInput struct {
 	File      *multipart.FileHeader
 }
 
+func validateImageFile(file *multipart.FileHeader) (string, error) {
+	if file == nil {
+		return "", errors.New("image file is required")
+	}
+
+	if file.Size > 10*1024*1024 {
+		return "", errors.New("image size must be less than 10MB")
+	}
+
+	// SRS 5.1: extension check (in addition to MIME check).
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	switch ext {
+	case ".jpg", ".jpeg", ".png", ".webp":
+	default:
+		return "", errors.New("unsupported image extension: must be JPG, JPEG, PNG or WebP")
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	buffer := make([]byte, 512)
+	_, err = src.Read(buffer)
+	if err != nil {
+		return "", err
+	}
+
+	mimeType := http.DetectContentType(buffer)
+	switch mimeType {
+	case "image/jpeg", "image/png", "image/webp":
+		return mimeType, nil
+	default:
+		return "", fmt.Errorf("unsupported image type: %s", mimeType)
+	}
+}
+
 func (s *ProductImageService) Upload(
 	input UploadProductImageInput,
 ) (*models.ProductImage, error) {
@@ -61,43 +100,8 @@ func (s *ProductImageService) Upload(
 		return nil, errors.New("maximum 15 images allowed per product")
 	}
 
-	if input.File == nil {
-		return nil, errors.New("image file is required")
-	}
-
-	if input.File.Size > 10*1024*1024 {
-		return nil, errors.New("image size must be less than 10MB")
-	}
-
-	file, err := input.File.Open()
-
-	if err != nil {
+	if _, err := validateImageFile(input.File); err != nil {
 		return nil, err
-	}
-
-	defer file.Close()
-
-	buffer := make([]byte, 512)
-
-	_, err = file.Read(buffer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	mimeType := http.DetectContentType(buffer)
-
-	allowedTypes := map[string]bool{
-		"image/jpeg": true,
-		"image/png":  true,
-		"image/webp": true,
-	}
-
-	if !allowedTypes[mimeType] {
-		return nil, fmt.Errorf(
-			"unsupported image type: %s",
-			mimeType,
-		)
 	}
 
 	path, err := s.storage.Save(
@@ -193,4 +197,52 @@ func (s *ProductImageService) Reorder(
 		productID,
 		imageIDs,
 	)
+}
+
+type ReplaceProductImageInput struct {
+	ProductID uint
+	ImageID   uint
+	File      *multipart.FileHeader
+}
+
+// Replace swaps the file of an existing image in place (SRS 5.3):
+// position, display_order and cover flag are preserved.
+func (s *ProductImageService) Replace(
+	input ReplaceProductImageInput,
+) (*models.ProductImage, error) {
+	image, err := s.productImageRepository.FindByID(input.ImageID)
+	if err != nil {
+		return nil, errors.New("image not found")
+	}
+
+	if image.ProductID != input.ProductID {
+		return nil, errors.New("image does not belong to this product")
+	}
+
+	if _, err := validateImageFile(input.File); err != nil {
+		return nil, err
+	}
+
+	newPath, err := s.storage.Save(input.File)
+	if err != nil {
+		return nil, err
+	}
+
+	newURL := "/" + filepath.ToSlash(newPath)
+	if s.baseURL != "" {
+		newURL = s.baseURL + newURL
+	}
+
+	oldPath := image.FilePath
+	image.FilePath = newPath
+	image.ImageURL = newURL
+
+	if err := s.productImageRepository.Update(image); err != nil {
+		_ = s.storage.Delete(newPath)
+		return nil, err
+	}
+
+	_ = s.storage.Delete(oldPath)
+
+	return image, nil
 }

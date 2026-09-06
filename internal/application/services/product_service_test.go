@@ -144,6 +144,30 @@ func (m *mockProductRepo) GetInactiveCount() (int64, error) {
 	return 0, nil
 }
 
+type mockProductImageRepo struct {
+	counts map[uint]int64
+}
+
+func (m *mockProductImageRepo) Create(image *models.ProductImage) error { return nil }
+func (m *mockProductImageRepo) FindByID(id uint) (*models.ProductImage, error) {
+	return nil, errors.New("not found")
+}
+func (m *mockProductImageRepo) FindByProductID(productID uint) ([]models.ProductImage, error) {
+	return nil, nil
+}
+func (m *mockProductImageRepo) CountByProductID(productID uint) (int64, error) {
+	if m.counts == nil {
+		return 1, nil
+	}
+	if c, ok := m.counts[productID]; ok {
+		return c, nil
+	}
+	return 1, nil
+}
+func (m *mockProductImageRepo) Update(image *models.ProductImage) error { return nil }
+func (m *mockProductImageRepo) Reorder(productID uint, imageIDs []uint) error { return nil }
+func (m *mockProductImageRepo) Delete(image *models.ProductImage) error { return nil }
+
 func TestProductService_ProductCodeValidation(t *testing.T) {
 	prodRepo := &mockProductRepo{products: make(map[uint]*models.Product)}
 	catRepo := &mockCategoryRepo{categories: make(map[uint]*models.Category)}
@@ -152,7 +176,7 @@ func TestProductService_ProductCodeValidation(t *testing.T) {
 	_ = catRepo.Create(&models.Category{NameFA: "کت", NameEN: "Coat"})
 	_ = matRepo.Create(&models.Material{NameFA: "پشم", NameEN: "Wool"})
 
-	svc := services.NewProductService(prodRepo, catRepo, matRepo)
+	svc := services.NewProductService(prodRepo, catRepo, matRepo, &mockProductImageRepo{})
 
 	// Valid 3-digit product code
 	p1, err := svc.Create(services.CreateProductInput{
@@ -209,7 +233,7 @@ func TestProductService_OrderingAndDeletionRules(t *testing.T) {
 	_ = catRepo.Create(&models.Category{NameFA: "کت", NameEN: "Coat"})
 	_ = matRepo.Create(&models.Material{NameFA: "پشم", NameEN: "Wool"})
 
-	svc := services.NewProductService(prodRepo, catRepo, matRepo)
+	svc := services.NewProductService(prodRepo, catRepo, matRepo, &mockProductImageRepo{})
 
 	p1, _ := svc.Create(services.CreateProductInput{
 		ProductCode: "001",

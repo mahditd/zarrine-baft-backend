@@ -91,7 +91,11 @@ func (s *ProductRequestService) Create(
 	if customerPhone == "" {
 		customerPhone = user.Phone
 	} else {
-		customerPhone = utils.NormalizePhone(customerPhone)
+		norm, err := utils.NormalizePhone(customerPhone)
+		if err != nil {
+			return nil, errors.New("invalid phone number")
+		}
+		customerPhone = norm
 	}
 
 	// Company Name & Company Phone are strictly required
@@ -110,7 +114,11 @@ func (s *ProductRequestService) Create(
 	if companyPhone == "" {
 		return nil, errors.New("company phone is required")
 	}
-	companyPhone = utils.NormalizePhone(companyPhone)
+	normCompanyPhone, err := utils.NormalizePhone(companyPhone)
+	if err != nil {
+		return nil, errors.New("invalid company phone number")
+	}
+	companyPhone = normCompanyPhone
 
 	// Merge duplicate variants and validate quantities (SRS 11.2 & 11.3)
 	mergedQuantities := make(map[uint]int)

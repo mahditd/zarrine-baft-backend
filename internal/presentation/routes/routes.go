@@ -79,6 +79,7 @@ func SetupRoutes(
 
 		admin.POST("/products/:id/images", productImageController.Create)
 		admin.GET("/products/:id/images", productImageController.GetByProductID)
+		admin.PUT("/products/:id/images/:imageId", productImageController.Replace)
 		admin.DELETE("/product-images/:id", productImageController.Delete)
 		admin.PATCH("/products/:id/images/reorder", productImageController.Reorder)
 
@@ -91,6 +92,8 @@ func SetupRoutes(
 		admin.DELETE("/products/:id", productController.Delete)
 
 		admin.POST("/product-variants", productVariantController.Create)
+		admin.PATCH("/product-variants/:id", productVariantController.Update)
+		admin.DELETE("/product-variants/:id", productVariantController.Delete)
 		admin.GET("/products/:id/variants", productVariantController.GetByProductID)
 
 		admin.GET(

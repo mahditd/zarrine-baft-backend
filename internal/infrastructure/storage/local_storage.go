@@ -3,12 +3,14 @@ package storage
 import (
 	"bytes"
 	"image/jpeg"
+	_ "image/png"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 
 	"github.com/disintegration/imaging"
 	"github.com/google/uuid"
+	_ "golang.org/x/image/webp"
 )
 
 type LocalStorage struct {

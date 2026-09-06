@@ -188,3 +188,63 @@ func (c *ProductImageController) Reorder(
 		"message": "product images reordered successfully",
 	})
 }
+
+func (c *ProductImageController) Replace(
+	ctx *gin.Context,
+) {
+
+	productID, err := strconv.ParseUint(
+		ctx.Param("id"),
+		10,
+		64,
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid product id",
+		})
+		return
+	}
+
+	imageID, err := strconv.ParseUint(
+		ctx.Param("imageId"),
+		10,
+		64,
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid image id",
+		})
+		return
+	}
+
+	file, err := ctx.FormFile("image")
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "image file is required",
+		})
+		return
+	}
+
+	image, err := c.service.Replace(
+		services.ReplaceProductImageInput{
+			ProductID: uint(productID),
+			ImageID:   uint(imageID),
+			File:      file,
+		},
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "product image replaced successfully",
+		"image":   dto.FromProductImage(image),
+	})
+}
