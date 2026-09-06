@@ -20,6 +20,11 @@ func SetupRoutes(
 	jwtSecret string,
 ) {
 
+	router.Static(
+		"/uploads",
+		"./uploads",
+	)
+
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": "ok",
@@ -77,6 +82,7 @@ func SetupRoutes(
 		admin.POST("/products/:id/images", productImageController.Create)
 		admin.GET("/products/:id/images", productImageController.GetByProductID)
 		admin.DELETE("/product-images/:id", productImageController.Delete)
+		admin.PATCH("/products/:id/images/reorder", productImageController.Reorder)
 
 		admin.POST("/products", productController.Create)
 		admin.GET("/products", productController.GetAll)

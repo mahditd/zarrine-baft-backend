@@ -8,6 +8,7 @@
 /*.dll
 /*.so
 /*.dylib
+uploads/
 
 # Test files
 *.test

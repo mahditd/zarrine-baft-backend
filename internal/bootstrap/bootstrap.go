@@ -9,6 +9,7 @@ import (
 	"github.com/mahditd/zarrine-baft-backend/internal/config"
 	"github.com/mahditd/zarrine-baft-backend/internal/infrastructure/database"
 	"github.com/mahditd/zarrine-baft-backend/internal/infrastructure/repositories"
+	"github.com/mahditd/zarrine-baft-backend/internal/infrastructure/storage"
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/controllers"
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/routes"
 )
@@ -99,12 +100,17 @@ func Start() {
 		productVariantService,
 	)
 
+	localStorage := storage.NewLocalStorage(
+		cfg.UploadPath,
+	)
+
 	// Product Image
 	productImageRepository := repositories.NewProductImageRepository(db)
 
 	productImageService := services.NewProductImageService(
 		productImageRepository,
 		productRepository,
+		localStorage,
 	)
 
 	productImageController := controllers.NewProductImageController(

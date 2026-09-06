@@ -5,15 +5,17 @@ import (
 )
 
 type ProductImageRepository interface {
-	Create(
-		image *models.ProductImage,
-	) error
+	Create(image *models.ProductImage) error
 
-	FindByProductID(
-		productID uint,
-	) ([]models.ProductImage, error)
+	FindByID(id uint) (*models.ProductImage, error)
 
-	Delete(
-		id uint,
-	) error
+	FindByProductID(productID uint) ([]models.ProductImage, error)
+
+	CountByProductID(productID uint) (int64, error)
+
+	Update(image *models.ProductImage) error
+
+	Reorder(productID uint, imageIDs []uint) error
+
+	Delete(image *models.ProductImage) error
 }

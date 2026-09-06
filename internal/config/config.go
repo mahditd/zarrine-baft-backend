@@ -16,6 +16,7 @@ type Config struct {
 	DBName         string
 	JWTSecret      string
 	JWTExpireHours int
+	UploadPath     string
 }
 
 func Load() *Config {
@@ -23,6 +24,11 @@ func Load() *Config {
 	err := godotenv.Load()
 	if err != nil {
 		panic("Error loading .env file")
+	}
+
+	uploadPath := os.Getenv("UPLOAD_PATH")
+	if uploadPath == "" {
+		uploadPath = "./uploads"
 	}
 
 	return &Config{
@@ -36,5 +42,6 @@ func Load() *Config {
 
 		JWTSecret:      os.Getenv("JWT_SECRET"),
 		JWTExpireHours: 24,
+		UploadPath:     uploadPath,
 	}
 }

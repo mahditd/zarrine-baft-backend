@@ -40,18 +40,21 @@ func (c *ProductImageController) Create(
 		return
 	}
 
-	var input services.CreateProductImageInput
+	file, err := ctx.FormFile("image")
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"error": "image file is required",
 		})
 		return
 	}
 
-	input.ProductID = uint(productID)
-
-	image, err := c.service.Create(input)
+	image, err := c.service.Upload(
+		services.UploadProductImageInput{
+			ProductID: uint(productID),
+			File:      file,
+		},
+	)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -61,7 +64,7 @@ func (c *ProductImageController) Create(
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "product image created successfully",
+		"message": "product image uploaded successfully",
 		"image":   dto.FromProductImage(image),
 	})
 }
@@ -138,5 +141,50 @@ func (c *ProductImageController) Delete(
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "product image deleted successfully",
+	})
+}
+
+func (c *ProductImageController) Reorder(
+	ctx *gin.Context,
+) {
+
+	productID, err := strconv.ParseUint(
+		ctx.Param("id"),
+		10,
+		64,
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid product id",
+		})
+		return
+	}
+
+	var body struct {
+		ImageIDs []uint `json:"image_ids"`
+	}
+
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = c.service.Reorder(
+		uint(productID),
+		body.ImageIDs,
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "product images reordered successfully",
 	})
 }

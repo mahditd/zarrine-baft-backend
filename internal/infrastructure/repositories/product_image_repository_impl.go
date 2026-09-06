@@ -24,7 +24,24 @@ func (r *ProductImageRepositoryImpl) Create(
 	image *models.ProductImage,
 ) error {
 
-	return r.db.Create(image).Error
+	return r.db.Select(
+		"ProductID",
+		"ImageURL",
+		"FilePath",
+		"DisplayOrder",
+		"IsCover",
+	).Create(image).Error
+}
+
+func (r *ProductImageRepositoryImpl) FindByID(
+	id uint,
+) (*models.ProductImage, error) {
+	var image models.ProductImage
+	err := r.db.First(&image, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &image, nil
 }
 
 func (r *ProductImageRepositoryImpl) FindByProductID(
@@ -35,18 +52,72 @@ func (r *ProductImageRepositoryImpl) FindByProductID(
 
 	err := r.db.
 		Where("product_id = ?", productID).
+		Order("display_order ASC, id ASC").
 		Find(&images).
 		Error
 
 	return images, err
 }
 
-func (r *ProductImageRepositoryImpl) Delete(
-	id uint,
-) error {
+func (r *ProductImageRepositoryImpl) CountByProductID(
+	productID uint,
+) (int64, error) {
+	var count int64
+	err := r.db.Model(&models.ProductImage{}).Where("product_id = ?", productID).Count(&count).Error
+	return count, err
+}
 
-	return r.db.Delete(
-		&models.ProductImage{},
-		id,
-	).Error
+func (r *ProductImageRepositoryImpl) Update(
+	image *models.ProductImage,
+) error {
+	return r.db.Save(image).Error
+}
+
+func (r *ProductImageRepositoryImpl) Reorder(
+	productID uint,
+	imageIDs []uint,
+) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		for i, id := range imageIDs {
+			isCover := (i == 0)
+			err := tx.Model(&models.ProductImage{}).
+				Where("id = ? AND product_id = ?", id, productID).
+				Updates(map[string]interface{}{
+					"display_order": i + 1,
+					"is_cover":      isCover,
+				}).Error
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (r *ProductImageRepositoryImpl) Delete(
+	image *models.ProductImage,
+) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		productID := image.ProductID
+		wasCover := image.IsCover
+
+		// Permanent deletion
+		if err := tx.Unscoped().Delete(image).Error; err != nil {
+			return err
+		}
+
+		// If the deleted image was cover, reassign cover to the new first image
+		if wasCover {
+			var first models.ProductImage
+			err := tx.Where("product_id = ?", productID).
+				Order("display_order ASC, id ASC").
+				First(&first).
+				Error
+			if err == nil {
+				_ = tx.Model(&first).Update("is_cover", true).Error
+			}
+		}
+
+		return nil
+	})
 }
