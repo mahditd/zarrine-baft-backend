@@ -100,3 +100,17 @@ func (r *ProductVariantRepositoryImpl) FindByProductColorAndSize(
 
 	return &variant, nil
 }
+
+func (r *ProductVariantRepositoryImpl) Update(
+	variant *models.ProductVariant,
+) error {
+
+	return r.db.Save(variant).Error
+}
+
+func (r *ProductVariantRepositoryImpl) Delete(
+	variant *models.ProductVariant,
+) error {
+
+	return r.db.Delete(variant).Error
+}

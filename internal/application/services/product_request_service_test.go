@@ -96,6 +96,18 @@ func (m *mockRequestRepo) Update(r *models.ProductRequest) error {
 	return nil
 }
 
+func (m *mockVariantRepo) Delete(
+	variant *models.ProductVariant,
+) error {
+	return nil
+}
+
+func (m *mockVariantRepo) Update(
+	variant *models.ProductVariant,
+) error {
+	return nil
+}
+
 func (m *mockRequestRepo) FindByID(id uint) (*models.ProductRequest, error) {
 	if r, exists := m.requests[id]; exists {
 		return r, nil
