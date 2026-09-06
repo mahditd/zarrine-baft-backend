@@ -18,6 +18,8 @@ type ProductVariant struct {
 	SizeID uint  `gorm:"uniqueIndex:idx_product_color_size"`
 	Size   *Size `gorm:"foreignKey:SizeID"`
 
+	Price int64 `gorm:"not null"`
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 

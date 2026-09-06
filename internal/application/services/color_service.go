@@ -7,6 +7,7 @@ import (
 
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/repositories"
+	"github.com/mahditd/zarrine-baft-backend/internal/utils"
 )
 
 type ColorService struct {
@@ -32,7 +33,7 @@ func (s *ColorService) Create(
 	input CreateColorInput,
 ) (*models.Color, error) {
 
-	input.NameFA = normalizeColorName(input.NameFA)
+	input.NameFA = utils.NormalizePersian(input.NameFA)
 	input.NameEN = normalizeColorName(input.NameEN)
 	input.HexCode = strings.TrimSpace(input.HexCode)
 

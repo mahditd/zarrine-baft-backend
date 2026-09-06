@@ -117,6 +117,7 @@ func Start() {
 	productRequestService := services.NewProductRequestService(
 		productRequestRepository,
 		productVariantRepository,
+		userRepository,
 	)
 
 	productRequestController := controllers.NewProductRequestController(

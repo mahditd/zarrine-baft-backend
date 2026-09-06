@@ -6,6 +6,7 @@ import (
 
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/repositories"
+	"github.com/mahditd/zarrine-baft-backend/internal/utils"
 )
 
 type MaterialService struct {
@@ -30,7 +31,7 @@ func (s *MaterialService) Create(
 	input CreateMaterialInput,
 ) (*models.Material, error) {
 
-	input.NameFA = normalizeMaterialName(input.NameFA)
+	input.NameFA = utils.NormalizePersian(input.NameFA)
 	input.NameEN = normalizeMaterialName(input.NameEN)
 
 	if input.NameFA == "" {

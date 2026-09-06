@@ -32,9 +32,10 @@ func NewProductVariantService(
 }
 
 type CreateProductVariantInput struct {
-	ProductID uint `json:"product_id"`
-	ColorID   uint `json:"color_id"`
-	SizeID    uint `json:"size_id"`
+	ProductID uint  `json:"product_id"`
+	ColorID   uint  `json:"color_id"`
+	SizeID    uint  `json:"size_id"`
+	Price     int64 `json:"price"`
 }
 
 func (s *ProductVariantService) Create(
@@ -42,7 +43,8 @@ func (s *ProductVariantService) Create(
 ) (*models.ProductVariant, error) {
 	if input.ProductID == 0 ||
 		input.ColorID == 0 ||
-		input.SizeID == 0 {
+		input.SizeID == 0 ||
+		input.Price <= 0 {
 		return nil, errors.New("invalid variant data")
 	}
 
@@ -88,6 +90,7 @@ func (s *ProductVariantService) Create(
 		ProductID: input.ProductID,
 		ColorID:   input.ColorID,
 		SizeID:    input.SizeID,
+		Price:     input.Price,
 	}
 
 	err = s.productVariantRepository.Create(

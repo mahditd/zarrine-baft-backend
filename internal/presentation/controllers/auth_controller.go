@@ -104,3 +104,78 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		"user":    dto.FromUser(result.User),
 	})
 }
+
+func (c *AuthController) GetProfile(ctx *gin.Context) {
+	userIDVal, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized",
+		})
+		return
+	}
+	userID := userIDVal.(uint)
+
+	user, err := c.authService.GetProfile(userID)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"user": dto.FromUser(user),
+	})
+}
+
+type updateProfileRequest struct {
+	FullName     string `json:"full_name"`
+	Email        string `json:"email"`
+	CompanyName  string `json:"company_name"`
+	CompanyPhone string `json:"company_phone"`
+	Country      string `json:"country"`
+	Address      string `json:"address"`
+}
+
+func (c *AuthController) UpdateProfile(ctx *gin.Context) {
+	userIDVal, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized",
+		})
+		return
+	}
+	userID := userIDVal.(uint)
+
+	var request updateProfileRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	user, err := c.authService.UpdateProfile(
+		userID,
+		services.UpdateProfileInput{
+			FullName:     request.FullName,
+			Email:        request.Email,
+			CompanyName:  request.CompanyName,
+			CompanyPhone: request.CompanyPhone,
+			Country:      request.Country,
+			Address:      request.Address,
+		},
+	)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "profile updated successfully",
+		"user":    dto.FromUser(user),
+	})
+}
+

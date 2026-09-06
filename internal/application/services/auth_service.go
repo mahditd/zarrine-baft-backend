@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -158,3 +159,76 @@ func (s *AuthService) Login(input LoginInput) (*LoginResult, error) {
 		Token: token,
 	}, nil
 }
+
+type UpdateProfileInput struct {
+	FullName     string `json:"full_name"`
+	Email        string `json:"email"`
+	CompanyName  string `json:"company_name"`
+	CompanyPhone string `json:"company_phone"`
+	Country      string `json:"country"`
+	Address      string `json:"address"`
+}
+
+func (s *AuthService) GetProfile(userID uint) (*models.User, error) {
+	user, err := s.userRepository.FindByID(userID)
+	if err != nil || user == nil {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
+}
+
+func (s *AuthService) UpdateProfile(
+	userID uint,
+	input UpdateProfileInput,
+) (*models.User, error) {
+
+	user, err := s.userRepository.FindByID(userID)
+	if err != nil || user == nil {
+		return nil, errors.New("user not found")
+	}
+
+	fullName := strings.TrimSpace(input.FullName)
+	if fullName != "" {
+		user.FullName = fullName
+	}
+
+	email := strings.TrimSpace(input.Email)
+	if email != "" {
+		if user.Email == nil || *user.Email != email {
+			existing, err := s.userRepository.FindByEmail(email)
+			if err == nil && existing != nil && existing.ID != user.ID {
+				return nil, errors.New("email already exists")
+			}
+		}
+		user.Email = &email
+	}
+
+	companyName := strings.TrimSpace(input.CompanyName)
+	if companyName != "" {
+		user.CompanyName = &companyName
+	}
+
+	companyPhone := strings.TrimSpace(input.CompanyPhone)
+	if companyPhone != "" {
+		norm := utils.NormalizePhone(companyPhone)
+		user.CompanyPhone = &norm
+	}
+
+	country := strings.TrimSpace(input.Country)
+	if country != "" {
+		user.Country = &country
+	}
+
+	address := strings.TrimSpace(input.Address)
+	if address != "" {
+		user.Address = &address
+	}
+
+	err = s.userRepository.Update(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+

@@ -52,7 +52,7 @@ func (r *MaterialRepositoryImpl) FindByNameEN(
 	var material models.Material
 
 	err := r.db.
-		Where("name_en = ?", name).
+		Where("LOWER(name_en) = LOWER(?)", name).
 		First(&material).
 		Error
 

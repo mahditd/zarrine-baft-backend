@@ -11,6 +11,8 @@ import (
 
 func Connect(cfg *config.Config) *gorm.DB {
 
+	fmt.Println("DATABASE:", cfg.DBName)
+
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		cfg.DBHost,
@@ -25,6 +27,11 @@ func Connect(cfg *config.Config) *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
+
+	var dbName string
+	db.Raw("SELECT current_database()").Scan(&dbName)
+
+	fmt.Println("CONNECTED DATABASE:", dbName)
 
 	return db
 }

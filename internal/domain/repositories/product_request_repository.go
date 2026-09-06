@@ -31,4 +31,27 @@ type ProductRequestRepository interface {
 	Update(
 		request *models.ProductRequest,
 	) error
+
+	CreateStatusHistory(
+		history *models.ProductRequestStatusHistory,
+	) error
+
+	FindByUserIDPaginated(
+		userID uint,
+		page int,
+		limit int,
+	) (
+		[]models.ProductRequest,
+		int64,
+		error,
+	)
+
+	FindByIDAndUserID(
+		id uint,
+		userID uint,
+	) (*models.ProductRequest, error)
+
+	GetLatestRequestNumber(
+		year int,
+	) (string, error)
 }

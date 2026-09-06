@@ -52,7 +52,7 @@ func (r *CategoryRepositoryImpl) FindByNameEN(
 	var category models.Category
 
 	err := r.db.
-		Where("name_en = ?", name).
+		Where("LOWER(name_en) = LOWER(?)", name).
 		First(&category).
 		Error
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/models"
 	"github.com/mahditd/zarrine-baft-backend/internal/domain/repositories"
+	"github.com/mahditd/zarrine-baft-backend/internal/utils"
 )
 
 type CategoryService struct {
@@ -30,7 +31,7 @@ func (s *CategoryService) Create(
 	input CreateCategoryInput,
 ) (*models.Category, error) {
 
-	input.NameFA = normalizeName(input.NameFA)
+	input.NameFA = utils.NormalizePersian(input.NameFA)
 	input.NameEN = normalizeName(input.NameEN)
 
 	if input.NameFA == "" {

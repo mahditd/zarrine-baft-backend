@@ -14,6 +14,7 @@ type ProductVariantResponse struct {
 	ProductID uint          `json:"product_id"`
 	Color     ColorResponse `json:"color"`
 	Size      *SizeResponse `json:"size"`
+	Price     int64         `json:"price"`
 }
 
 func FromProductVariant(
@@ -23,6 +24,7 @@ func FromProductVariant(
 	response := ProductVariantResponse{
 		ID:        variant.ID,
 		ProductID: variant.ProductID,
+		Price:     variant.Price,
 	}
 
 	if variant.Color != nil {

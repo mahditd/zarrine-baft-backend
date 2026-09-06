@@ -52,7 +52,7 @@ func (r *ColorRepositoryImpl) FindByNameEN(
 	var color models.Color
 
 	err := r.db.
-		Where("name_en = ?", name).
+		Where("LOWER(name_en) = LOWER(?)", name).
 		First(&color).
 		Error
 

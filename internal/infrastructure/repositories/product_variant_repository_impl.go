@@ -64,6 +64,7 @@ func (r *ProductVariantRepositoryImpl) FindByID(
 	var variant models.ProductVariant
 
 	err := r.db.
+		Preload("Product").
 		Preload("Color").
 		Preload("Size").
 		First(&variant, id).

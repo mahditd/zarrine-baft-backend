@@ -16,6 +16,7 @@ type ProductRequestItem struct {
 	ProductVariant   *ProductVariant `gorm:"foreignKey:ProductVariantID"`
 
 	Quantity int `gorm:"not null"`
+	PriceSnapshot int64 `gorm:"not null"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

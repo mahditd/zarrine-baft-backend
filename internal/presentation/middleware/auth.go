@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -41,6 +42,10 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 			tokenString,
 			&utils.JWTClaims{},
 			func(token *jwt.Token) (interface{}, error) {
+
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, errors.New("unexpected signing method")
+				}
 
 				return []byte(secret), nil
 			},
@@ -87,7 +92,9 @@ func RequireRole(role string) gin.HandlerFunc {
 			return
 		}
 
-		if userRole != role {
+		currentRole, ok := userRole.(string)
+
+		if !ok || currentRole != role {
 			ctx.JSON(403, gin.H{
 				"error": "forbidden",
 			})

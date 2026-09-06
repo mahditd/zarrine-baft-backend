@@ -32,10 +32,20 @@ func SetupRoutes(
 		auth.POST("/login", authController.Login)
 	}
 
-	router.POST(
-		"/api/requests",
-		productRequestController.Create,
-	)
+	// Authenticated Customer / User routes
+	authenticated := router.Group("/api")
+	authenticated.Use(middleware.AuthMiddleware(jwtSecret))
+	{
+		// Profile (SRS 3.3)
+		authenticated.GET("/me/profile", authController.GetProfile)
+		authenticated.PATCH("/me/profile", authController.UpdateProfile)
+
+		// Requests (SRS 12 & 14)
+		authenticated.POST("/requests", productRequestController.Create)
+		authenticated.GET("/me/requests", productRequestController.GetMyRequests)
+		authenticated.GET("/me/requests/:id", productRequestController.GetMyRequestByID)
+		authenticated.PATCH("/me/requests/:id/cancel", productRequestController.Cancel)
+	}
 
 	router.GET(
 		"/api/products",
@@ -70,6 +80,7 @@ func SetupRoutes(
 
 		admin.POST("/products", productController.Create)
 		admin.GET("/products", productController.GetAll)
+		admin.PATCH("/products/reorder", productController.Reorder)
 		admin.GET("/products/:id", productController.GetByID)
 		admin.PATCH("/products/:id", productController.Update)
 		admin.PATCH("/products/:id/status", productController.UpdateStatus)
