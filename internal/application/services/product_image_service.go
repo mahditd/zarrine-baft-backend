@@ -16,18 +16,21 @@ type ProductImageService struct {
 	productImageRepository repositories.ProductImageRepository
 	productRepository      repositories.ProductRepository
 	storage                storage.Storage
+	baseURL                string
 }
 
 func NewProductImageService(
 	productImageRepository repositories.ProductImageRepository,
 	productRepository repositories.ProductRepository,
 	fileStorage storage.Storage,
+	baseURL string,
 ) *ProductImageService {
 
 	return &ProductImageService{
 		productImageRepository: productImageRepository,
 		productRepository:      productRepository,
 		storage:                fileStorage,
+		baseURL:                baseURL,
 	}
 }
 
@@ -105,12 +108,16 @@ func (s *ProductImageService) Upload(
 		return nil, err
 	}
 
+	imageURL := "/" + filepath.ToSlash(path)
+
+	if s.baseURL != "" {
+		imageURL = s.baseURL + imageURL
+	}
+
 	image := &models.ProductImage{
-		ProductID:    input.ProductID,
-		FilePath:     path,
-		ImageURL:     "/" + filepath.ToSlash(path),
-		DisplayOrder: int(count) + 1,
-		IsCover:      count == 0,
+		ProductID: input.ProductID,
+		FilePath:  path,
+		ImageURL:  imageURL,
 	}
 
 	err = s.productImageRepository.Create(

@@ -20,16 +20,13 @@ func SetupRoutes(
 	jwtSecret string,
 ) {
 
-	router.Static(
-		"/uploads",
-		"./uploads",
-	)
-
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": "ok",
 		})
 	})
+
+	router.Static("/uploads", "./uploads")
 
 	auth := router.Group("/api/auth")
 	{

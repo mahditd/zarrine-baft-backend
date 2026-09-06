@@ -84,7 +84,7 @@ func (s *LocalStorage) Save(file *multipart.FileHeader) (string, error) {
 		return "", err
 	}
 
-	return path, nil
+	return filepath.ToSlash(path), nil
 }
 
 func (s *LocalStorage) Delete(path string) error {

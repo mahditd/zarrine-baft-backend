@@ -17,6 +17,7 @@ type Config struct {
 	JWTSecret      string
 	JWTExpireHours int
 	UploadPath     string
+	BaseURL        string
 }
 
 func Load() *Config {
@@ -43,5 +44,6 @@ func Load() *Config {
 		JWTSecret:      os.Getenv("JWT_SECRET"),
 		JWTExpireHours: 24,
 		UploadPath:     uploadPath,
+		BaseURL:        os.Getenv("BASE_URL"),
 	}
 }

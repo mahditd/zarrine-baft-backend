@@ -101,7 +101,7 @@ func Start() {
 	)
 
 	localStorage := storage.NewLocalStorage(
-		cfg.UploadPath,
+		cfg.UploadPath + "/products",
 	)
 
 	// Product Image
@@ -111,6 +111,7 @@ func Start() {
 		productImageRepository,
 		productRepository,
 		localStorage,
+		cfg.BaseURL,
 	)
 
 	productImageController := controllers.NewProductImageController(
