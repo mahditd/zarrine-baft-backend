@@ -7,6 +7,8 @@ import (
 type ProductResponse struct {
 	ID uint `json:"id"`
 
+	ProductCode string `json:"product_code"`
+
 	NameFA string `json:"name_fa"`
 	NameEN string `json:"name_en"`
 
@@ -43,6 +45,8 @@ func FromProduct(
 
 	return ProductResponse{
 		ID: product.ID,
+
+		ProductCode: product.ProductCode,
 
 		NameFA: product.NameFA,
 		NameEN: product.NameEN,
