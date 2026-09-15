@@ -156,11 +156,32 @@ func (s *ProductRequestService) Create(
 			return nil, errors.New("product variant not found")
 		}
 
-		if variant.Product != nil && !variant.Product.IsActive {
+		// SRS 12.1: block if product/color/size is no longer available.
+		// Variant soft-delete is already filtered by FindByID (record not found).
+		// Color/Size soft-delete yields nil preload (GORM skips deleted_at != NULL).
+		if variant.Product == nil {
+			return nil, errors.New("product is no longer available")
+		}
+		if !variant.Product.IsActive {
 			return nil, fmt.Errorf("product '%s' is inactive and cannot be requested", variant.Product.NameFA)
+		}
+		if variant.Color == nil {
+			return nil, errors.New("color is no longer available for the requested product")
+		}
+		if variant.Size == nil {
+			return nil, errors.New("size is no longer available for the requested product")
 		}
 
 		qty := mergedQuantities[variantID]
+
+		productCode := variant.Product.ProductCode
+		productNameFA := variant.Product.NameFA
+		productNameEN := variant.Product.NameEN
+
+		colorNameFA := variant.Color.NameFA
+		colorNameEN := variant.Color.NameEN
+
+		sizeName := variant.Size.Name
 
 		requestItems = append(
 			requestItems,
@@ -168,30 +189,56 @@ func (s *ProductRequestService) Create(
 				ProductVariantID: variantID,
 				Quantity:         qty,
 				PriceSnapshot:    variant.Price,
+				ProductCode:      productCode,
+				ProductNameFA:    productNameFA,
+				ProductNameEN:    productNameEN,
+				ColorNameFA:      colorNameFA,
+				ColorNameEN:      colorNameEN,
+				SizeName:         sizeName,
 			},
 		)
 	}
 
-	reqNumber, err := s.generateRequestNumber()
-	if err != nil {
-		return nil, errors.New("failed to generate request number: " + err.Error())
+	var request *models.ProductRequest
+	var createErr error
+
+	// Retry loop to handle concurrent request number generation gracefully
+	for attempt := 0; attempt < 5; attempt++ {
+		reqNumber, err := s.generateRequestNumber()
+		if err != nil {
+			return nil, errors.New("failed to generate request number: " + err.Error())
+		}
+
+		// If retrying, maybe slightly advance
+		if attempt > 0 {
+			parts := strings.Split(reqNumber, "-")
+			if len(parts) == 2 {
+				if seq, err := strconv.Atoi(parts[1]); err == nil {
+					reqNumber = fmt.Sprintf("%s-%06d", parts[0], seq+attempt)
+				}
+			}
+		}
+
+		request = &models.ProductRequest{
+			UserID:        userID,
+			RequestNumber: reqNumber,
+			CustomerName:  customerName,
+			Phone:         customerPhone,
+			CompanyName:   companyName,
+			CompanyPhone:  companyPhone,
+			Description:   strings.TrimSpace(input.Description),
+			Status:        models.RequestNew,
+			Items:         requestItems,
+		}
+
+		createErr = s.productRequestRepository.Create(request)
+		if createErr == nil {
+			break
+		}
 	}
 
-	request := &models.ProductRequest{
-		UserID:        userID,
-		RequestNumber: reqNumber,
-		CustomerName:  customerName,
-		Phone:         customerPhone,
-		CompanyName:   companyName,
-		CompanyPhone:  companyPhone,
-		Description:   strings.TrimSpace(input.Description),
-		Status:        models.RequestNew,
-		Items:         requestItems,
-	}
-
-	err = s.productRequestRepository.Create(request)
-	if err != nil {
-		return nil, err
+	if createErr != nil {
+		return nil, createErr
 	}
 
 	// Record initial status history

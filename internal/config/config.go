@@ -18,22 +18,49 @@ type Config struct {
 	JWTExpireHours int
 	UploadPath     string
 	BaseURL        string
+	ClientURL      string
+
+	AdminPhone    string
+	AdminPassword string
+	AdminName     string
 }
 
 func Load() *Config {
-
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
-	}
+	// Load .env if present (ignore error if running with system env in Docker/CI)
+	_ = godotenv.Load()
 
 	uploadPath := os.Getenv("UPLOAD_PATH")
 	if uploadPath == "" {
 		uploadPath = "./uploads"
 	}
 
+	appPort := os.Getenv("APP_PORT")
+	if appPort == "" {
+		appPort = "8080"
+	}
+
+	clientURL := os.Getenv("CLIENT_URL")
+	if clientURL == "" {
+		clientURL = "http://localhost:5173"
+	}
+
+	adminPhone := os.Getenv("ADMIN_PHONE")
+	if adminPhone == "" {
+		adminPhone = "09120000000"
+	}
+
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		adminPassword = "Admin@123456"
+	}
+
+	adminName := os.Getenv("ADMIN_NAME")
+	if adminName == "" {
+		adminName = "Super Admin"
+	}
+
 	return &Config{
-		AppPort: os.Getenv("APP_PORT"),
+		AppPort: appPort,
 
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PORT"),
@@ -45,5 +72,10 @@ func Load() *Config {
 		JWTExpireHours: 24,
 		UploadPath:     uploadPath,
 		BaseURL:        os.Getenv("BASE_URL"),
+		ClientURL:      clientURL,
+
+		AdminPhone:    adminPhone,
+		AdminPassword: adminPassword,
+		AdminName:     adminName,
 	}
 }

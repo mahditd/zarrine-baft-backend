@@ -93,7 +93,7 @@ func (s *ProductService) Create(
 		NameEN:      input.NameEN,
 		CategoryID:  input.CategoryID,
 		MaterialID:  input.MaterialID,
-		IsActive:    true,
+		IsActive:    false,
 	}
 
 	err = s.productRepository.Create(product)

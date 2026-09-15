@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"net/mail"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
@@ -54,6 +55,12 @@ type LoginResult struct {
 
 func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 
+	// SRS 3.1: full name is required.
+	input.FullName = strings.TrimSpace(input.FullName)
+	if input.FullName == "" {
+		return nil, errors.New("full name is required")
+	}
+
 	normalizedPhone, err := utils.NormalizePhone(input.Phone)
 	if err != nil {
 		return nil, errors.New("invalid phone number")
@@ -67,6 +74,10 @@ func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 	}
 
 	if input.Email != "" {
+		input.Email = strings.TrimSpace(strings.ToLower(input.Email))
+		if _, err := mail.ParseAddress(input.Email); err != nil {
+			return nil, errors.New("invalid email format")
+		}
 
 		existingUser, err := s.userRepository.FindByEmail(input.Email)
 
@@ -104,7 +115,10 @@ func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 	}
 
 	if input.CompanyName != "" {
-		user.CompanyName = &input.CompanyName
+		trimmed := strings.TrimSpace(input.CompanyName)
+		if trimmed != "" {
+			user.CompanyName = &trimmed
+		}
 	}
 
 	if input.CompanyPhone != "" {
@@ -115,12 +129,20 @@ func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 		user.CompanyPhone = &normCompany
 	}
 
-	if input.Country != "" {
-		user.Country = &input.Country
+	// SRS 3.4: Iran selected by default when country is not provided.
+	if strings.TrimSpace(input.Country) == "" {
+		defaultCountry := "Iran"
+		user.Country = &defaultCountry
+	} else {
+		trimmed := strings.TrimSpace(input.Country)
+		user.Country = &trimmed
 	}
 
 	if input.Address != "" {
-		user.Address = &input.Address
+		trimmed := strings.TrimSpace(input.Address)
+		if trimmed != "" {
+			user.Address = &trimmed
+		}
 	}
 
 	err = s.userRepository.Create(user)
@@ -204,8 +226,11 @@ func (s *AuthService) UpdateProfile(
 		user.FullName = fullName
 	}
 
-	email := strings.TrimSpace(input.Email)
+	email := strings.TrimSpace(strings.ToLower(input.Email))
 	if email != "" {
+		if _, err := mail.ParseAddress(email); err != nil {
+			return nil, errors.New("invalid email format")
+		}
 		if user.Email == nil || *user.Email != email {
 			existing, err := s.userRepository.FindByEmail(email)
 			if err == nil && existing != nil && existing.ID != user.ID {

@@ -53,25 +53,38 @@ func mapItems(items []models.ProductRequestItem) []ProductRequestItemResponse {
 		itemRes := ProductRequestItemResponse{
 			ID:               item.ID,
 			ProductVariantID: item.ProductVariantID,
+			ProductCode:      item.ProductCode,
+			ProductNameFA:    item.ProductNameFA,
+			ProductNameEN:    item.ProductNameEN,
+			ColorNameFA:      item.ColorNameFA,
+			ColorNameEN:      item.ColorNameEN,
+			SizeName:         item.SizeName,
 			Quantity:         item.Quantity,
 			PriceSnapshot:    item.PriceSnapshot,
 			CreatedAt:        item.CreatedAt,
 			UpdatedAt:        item.UpdatedAt,
 		}
 
+		// Fallback to preloaded variant if snapshot fields are blank (for legacy items)
 		if item.ProductVariant != nil {
-			if item.ProductVariant.Product != nil {
+			if itemRes.ProductCode == "" && item.ProductVariant.Product != nil {
 				itemRes.ProductCode = item.ProductVariant.Product.ProductCode
+			}
+			if itemRes.ProductNameFA == "" && item.ProductVariant.Product != nil {
 				itemRes.ProductNameFA = item.ProductVariant.Product.NameFA
+			}
+			if itemRes.ProductNameEN == "" && item.ProductVariant.Product != nil {
 				itemRes.ProductNameEN = item.ProductVariant.Product.NameEN
 			}
 
-			if item.ProductVariant.Color != nil {
+			if itemRes.ColorNameFA == "" && item.ProductVariant.Color != nil {
 				itemRes.ColorNameFA = item.ProductVariant.Color.NameFA
+			}
+			if itemRes.ColorNameEN == "" && item.ProductVariant.Color != nil {
 				itemRes.ColorNameEN = item.ProductVariant.Color.NameEN
 			}
 
-			if item.ProductVariant.Size != nil {
+			if itemRes.SizeName == "" && item.ProductVariant.Size != nil {
 				itemRes.SizeName = item.ProductVariant.Size.Name
 			}
 		}

@@ -87,3 +87,58 @@ func TestAuthService_GetAndUpdateProfile(t *testing.T) {
 		t.Errorf("expected 'email already exists' error, got %v", err)
 	}
 }
+
+func TestAuthService_RegisterValidation(t *testing.T) {
+	newService := func() (*services.AuthService, *mockUserRepo) {
+		repo := &mockUserRepo{users: make(map[uint]*models.User)}
+		return services.NewAuthService(repo, "secret", 24), repo
+	}
+
+	// Full name required (SRS 3.1)
+	svc, _ := newService()
+	_, err := svc.Register(services.RegisterInput{
+		FullName:        "   ",
+		Phone:           "09121112233",
+		Password:        "Password123",
+		ConfirmPassword: "Password123",
+	})
+	if err == nil || err.Error() != "full name is required" {
+		t.Errorf("expected 'full name is required', got %v", err)
+	}
+
+	// Invalid email format rejected
+	svc, _ = newService()
+	_, err = svc.Register(services.RegisterInput{
+		FullName:        "Test User",
+		Phone:           "09121112234",
+		Email:           "not-an-email",
+		Password:        "Password123",
+		ConfirmPassword: "Password123",
+	})
+	if err == nil || err.Error() != "invalid email format" {
+		t.Errorf("expected 'invalid email format', got %v", err)
+	}
+
+	// Country defaults to Iran (SRS 3.4), email normalized to lowercase
+	svc, repo := newService()
+	user, err := svc.Register(services.RegisterInput{
+		FullName:        "Test User",
+		Phone:           "09121112235",
+		Email:           "USER@Example.COM",
+		Password:        "Password123",
+		ConfirmPassword: "Password123",
+	})
+	if err != nil {
+		t.Fatalf("expected successful register, got %v", err)
+	}
+	if user.Country == nil || *user.Country != "Iran" {
+		t.Errorf("expected default country 'Iran', got %v", user.Country)
+	}
+	if user.Email == nil || *user.Email != "user@example.com" {
+		t.Errorf("expected normalized email 'user@example.com', got %v", user.Email)
+	}
+	stored, _ := repo.FindByID(user.ID)
+	if stored.Country == nil || *stored.Country != "Iran" {
+		t.Errorf("expected stored country 'Iran', got %v", stored.Country)
+	}
+}

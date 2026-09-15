@@ -3,18 +3,63 @@ services:
     image: postgres:17
     container_name: zarrine-postgres
     restart: always
-
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mahditd0010td00010
       POSTGRES_DB: zarrine_baft
-
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zarrine-backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      APP_PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: mahditd0010td00010
+      DB_NAME: zarrine_baft
+      JWT_SECRET: zarrine_baft_secret_2026
+      UPLOAD_PATH: /app/uploads
+      BASE_URL: http://localhost:8080
+      CLIENT_URL: http://localhost:5173
+      ADMIN_PHONE: "09120000000"
+      ADMIN_PASSWORD: "Admin@123456"
+      ADMIN_NAME: "Super Admin"
+    volumes:
+      - uploads_data:/app/uploads
+
+  # SRS 24: Frontend service placeholder (Phases 4-6).
+  # Uncomment once the Vite/React app exists in ../zarrine-baft-frontend.
+  # HTTPS is terminated at the production reverse proxy in front of `backend`.
+  # frontend:
+  #   build:
+  #     context: ../zarrine-baft-frontend
+  #   container_name: zarrine-frontend
+  #   restart: always
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "5173:80"
+  #   environment:
+  #     VITE_API_URL: http://backend:8080
 
 volumes:
   postgres_data:
+  uploads_data:

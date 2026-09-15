@@ -23,6 +23,23 @@ func NewProductVariantRepository(
 func (r *ProductVariantRepositoryImpl) Create(
 	variant *models.ProductVariant,
 ) error {
+	var existing models.ProductVariant
+	err := r.db.Unscoped().
+		Where("product_id = ? AND color_id = ? AND size_id = ?", variant.ProductID, variant.ColorID, variant.SizeID).
+		First(&existing).Error
+
+	if err == nil {
+		if existing.DeletedAt.Valid {
+			// Restore soft-deleted variant and update price
+			existing.DeletedAt = gorm.DeletedAt{}
+			existing.Price = variant.Price
+			if saveErr := r.db.Save(&existing).Error; saveErr != nil {
+				return saveErr
+			}
+			*variant = existing
+			return nil
+		}
+	}
 
 	return r.db.Create(variant).Error
 }

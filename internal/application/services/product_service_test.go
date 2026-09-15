@@ -277,3 +277,65 @@ func TestProductService_OrderingAndDeletionRules(t *testing.T) {
 		t.Errorf("expected deletion rejection error, got %v", err)
 	}
 }
+
+func TestProductService_CreateDefaultsInactive(t *testing.T) {
+	prodRepo := &mockProductRepo{products: make(map[uint]*models.Product)}
+	catRepo := &mockCategoryRepo{categories: make(map[uint]*models.Category)}
+	matRepo := &mockMaterialRepo{materials: make(map[uint]*models.Material)}
+
+	_ = catRepo.Create(&models.Category{NameFA: "کت", NameEN: "Coat"})
+	_ = matRepo.Create(&models.Material{NameFA: "پشم", NameEN: "Wool"})
+
+	svc := services.NewProductService(prodRepo, catRepo, matRepo, &mockProductImageRepo{})
+
+	p, err := svc.Create(services.CreateProductInput{
+		ProductCode: "010",
+		NameFA:      "محصول جدید",
+		NameEN:      "New Product",
+		CategoryID:  1,
+		MaterialID:  1,
+	})
+	if err != nil {
+		t.Fatalf("unexpected create error: %v", err)
+	}
+	if p.IsActive {
+		t.Errorf("expected new product IsActive=false, got true")
+	}
+}
+
+func TestProductService_ActivationRequiresImage(t *testing.T) {
+	prodRepo := &mockProductRepo{products: make(map[uint]*models.Product)}
+	catRepo := &mockCategoryRepo{categories: make(map[uint]*models.Category)}
+	matRepo := &mockMaterialRepo{materials: make(map[uint]*models.Material)}
+
+	_ = catRepo.Create(&models.Category{NameFA: "کت", NameEN: "Coat"})
+	_ = matRepo.Create(&models.Material{NameFA: "پشم", NameEN: "Wool"})
+
+	// Product 1 has 0 images -> activation must fail
+	imgRepo := &mockProductImageRepo{counts: map[uint]int64{1: 0, 2: 3}}
+	svc := services.NewProductService(prodRepo, catRepo, matRepo, imgRepo)
+
+	p1, _ := svc.Create(services.CreateProductInput{
+		ProductCode: "011",
+		NameFA:      "بدون عکس",
+		NameEN:      "No Image",
+		CategoryID:  1,
+		MaterialID:  1,
+	})
+	if err := svc.UpdateStatus(p1.ID, true); err == nil {
+		t.Errorf("expected activation error for 0-image product, got nil")
+	}
+
+	p2, _ := svc.Create(services.CreateProductInput{
+		ProductCode: "012",
+		NameFA:      "با عکس",
+		NameEN:      "With Image",
+		CategoryID:  1,
+		MaterialID:  1,
+	})
+	// Point mock count at p2's actual ID
+	imgRepo.counts[p2.ID] = 2
+	if err := svc.UpdateStatus(p2.ID, true); err != nil {
+		t.Errorf("expected activation success with images, got %v", err)
+	}
+}

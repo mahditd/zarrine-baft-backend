@@ -99,7 +99,7 @@ func preloadProduct(db *gorm.DB) *gorm.DB {
 		Preload("Category").
 		Preload("Material").
 		Preload("Images", func(db *gorm.DB) *gorm.DB {
-			return db.Order("product_images.id ASC")
+			return db.Order("product_images.display_order ASC, product_images.id ASC")
 		}).
 		Preload("Variants.Color").
 		Preload("Variants.Size")
@@ -181,14 +181,14 @@ func (r *ProductRepositoryImpl) FindActiveProducts(
 
 	if len(filter.ColorIDs) > 0 {
 		query = query.Where(
-			"id IN (SELECT product_id FROM product_variants WHERE color_id IN (?))",
+			"id IN (SELECT product_id FROM product_variants WHERE color_id IN (?) AND deleted_at IS NULL)",
 			filter.ColorIDs,
 		)
 	}
 
 	if len(filter.SizeIDs) > 0 {
 		query = query.Where(
-			"id IN (SELECT product_id FROM product_variants WHERE size_id IN (?))",
+			"id IN (SELECT product_id FROM product_variants WHERE size_id IN (?) AND deleted_at IS NULL)",
 			filter.SizeIDs,
 		)
 	}

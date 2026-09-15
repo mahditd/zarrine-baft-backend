@@ -243,12 +243,20 @@ func TestProductRequestCreation_SuccessWithItemMergingAndPriceSnapshot(t *testin
 		ID:        10,
 		ProductID: 1,
 		Product:   activeProduct,
+		ColorID:   1,
+		Color:     &models.Color{ID: 1, NameFA: "مشکی", NameEN: "Black"},
+		SizeID:    1,
+		Size:      &models.Size{ID: 1, Name: "M"},
 		Price:     850000,
 	}
 	variant2 := &models.ProductVariant{
 		ID:        20,
 		ProductID: 1,
 		Product:   activeProduct,
+		ColorID:   1,
+		Color:     &models.Color{ID: 1, NameFA: "مشکی", NameEN: "Black"},
+		SizeID:    2,
+		Size:      &models.Size{ID: 2, Name: "L"},
 		Price:     920000,
 	}
 	_ = varRepo.Create(variant1)
@@ -292,6 +300,14 @@ func TestProductRequestCreation_SuccessWithItemMergingAndPriceSnapshot(t *testin
 		t.Errorf("expected price snapshot 850000, got %d", req.Items[0].PriceSnapshot)
 	}
 
+	// Verify snapshot fields
+	if req.Items[0].ProductCode != "001" {
+		t.Errorf("expected snapshot ProductCode '001', got '%s'", req.Items[0].ProductCode)
+	}
+	if req.Items[0].ProductNameFA != "کت زمستانه" {
+		t.Errorf("expected snapshot ProductNameFA 'کت زمستانه', got '%s'", req.Items[0].ProductNameFA)
+	}
+
 	if req.Items[1].ProductVariantID != 20 || req.Items[1].Quantity != 2 {
 		t.Errorf("expected variant 20 with qty 2, got qty %d", req.Items[1].Quantity)
 	}
@@ -313,7 +329,10 @@ func TestProductRequestCreation_CompanyRequired(t *testing.T) {
 	_ = userRepo.Create(user)
 
 	activeProduct := &models.Product{ID: 1, IsActive: true}
-	variant := &models.ProductVariant{ID: 1, Product: activeProduct, Price: 100000}
+	variant := &models.ProductVariant{ID: 1, Product: activeProduct,
+		Color: &models.Color{ID: 1, NameFA: "مشکی", NameEN: "Black"},
+		Size:  &models.Size{ID: 1, Name: "M"},
+		Price: 100000}
 	_ = varRepo.Create(variant)
 
 	// Missing company name
@@ -346,7 +365,10 @@ func TestProductRequestCreation_InactiveProductRejected(t *testing.T) {
 	_ = userRepo.Create(user)
 
 	inactiveProduct := &models.Product{ID: 2, NameFA: "پیراهن غیرفعال", IsActive: false}
-	variant := &models.ProductVariant{ID: 5, Product: inactiveProduct, Price: 200000}
+	variant := &models.ProductVariant{ID: 5, Product: inactiveProduct,
+		Color: &models.Color{ID: 1, NameFA: "مشکی", NameEN: "Black"},
+		Size:  &models.Size{ID: 1, Name: "M"},
+		Price: 200000}
 	_ = varRepo.Create(variant)
 
 	input := services.CreateProductRequestInput{
@@ -368,7 +390,10 @@ func TestProductRequest_CustomerCancel(t *testing.T) {
 	_ = userRepo.Create(user)
 
 	product := &models.Product{ID: 1, IsActive: true}
-	variant := &models.ProductVariant{ID: 1, Product: product, Price: 50000}
+	variant := &models.ProductVariant{ID: 1, Product: product,
+		Color: &models.Color{ID: 1, NameFA: "مشکی", NameEN: "Black"},
+		Size:  &models.Size{ID: 1, Name: "M"},
+		Price: 50000}
 	_ = varRepo.Create(variant)
 
 	input := services.CreateProductRequestInput{
@@ -410,7 +435,10 @@ func TestProductRequest_AdminUpdateStatus(t *testing.T) {
 	_ = userRepo.Create(admin)
 
 	product := &models.Product{ID: 1, IsActive: true}
-	variant := &models.ProductVariant{ID: 1, Product: product, Price: 50000}
+	variant := &models.ProductVariant{ID: 1, Product: product,
+		Color: &models.Color{ID: 1, NameFA: "مشکی", NameEN: "Black"},
+		Size:  &models.Size{ID: 1, Name: "M"},
+		Price: 50000}
 	_ = varRepo.Create(variant)
 
 	input := services.CreateProductRequestInput{

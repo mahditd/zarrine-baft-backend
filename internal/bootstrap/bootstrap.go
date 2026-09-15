@@ -11,6 +11,7 @@ import (
 	"github.com/mahditd/zarrine-baft-backend/internal/infrastructure/repositories"
 	"github.com/mahditd/zarrine-baft-backend/internal/infrastructure/storage"
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/controllers"
+	"github.com/mahditd/zarrine-baft-backend/internal/presentation/middleware"
 	"github.com/mahditd/zarrine-baft-backend/internal/presentation/routes"
 )
 
@@ -23,6 +24,10 @@ func Start() {
 	database.Migrate(db)
 
 	database.SeedSizes(db)
+
+	if err := database.SeedAdmin(db, cfg.AdminPhone, cfg.AdminPassword, cfg.AdminName); err != nil {
+		fmt.Printf("Warning: failed to seed admin user: %v\n", err)
+	}
 
 	// User
 	userRepository := repositories.NewUserRepository(db)
@@ -145,6 +150,17 @@ func Start() {
 
 	router := gin.Default()
 
+	// Baseline security headers (SRS 22). HTTPS is terminated at the
+	// production reverse proxy in front of this service.
+	router.Use(middleware.SecurityHeaders())
+
+	// CORS support for web frontend SPA (SRS Technical Architecture)
+	router.Use(middleware.CORSMiddleware(cfg.ClientURL))
+
+	// Rate limiters (SRS 22: Login protection & API protection)
+	authLimiter := middleware.NewIPRateLimiter(15, 5)   // 15 auth requests/min with burst 5
+	apiLimiter := middleware.NewIPRateLimiter(120, 30)  // 120 API requests/min with burst 30
+
 	routes.SetupRoutes(
 		router,
 		authController,
@@ -157,6 +173,8 @@ func Start() {
 		productRequestController,
 		dashboardController,
 		cfg.JWTSecret,
+		authLimiter,
+		apiLimiter,
 	)
 
 	err := router.Run(

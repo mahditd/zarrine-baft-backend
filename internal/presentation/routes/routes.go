@@ -19,6 +19,8 @@ func SetupRoutes(
 	productRequestController *controllers.ProductRequestController,
 	dashboardController *controllers.DashboardController,
 	jwtSecret string,
+	authLimiter *middleware.IPRateLimiter,
+	apiLimiter *middleware.IPRateLimiter,
 ) {
 
 	router.GET("/health", func(c *gin.Context) {
@@ -30,6 +32,9 @@ func SetupRoutes(
 	router.Static("/uploads", "./uploads")
 
 	auth := router.Group("/api/auth")
+	if authLimiter != nil {
+		auth.Use(middleware.RateLimitMiddleware(authLimiter))
+	}
 	{
 		auth.POST("/register", authController.Register)
 		auth.POST("/login", authController.Login)
@@ -37,6 +42,9 @@ func SetupRoutes(
 
 	// Authenticated Customer / User routes
 	authenticated := router.Group("/api")
+	if apiLimiter != nil {
+		authenticated.Use(middleware.RateLimitMiddleware(apiLimiter))
+	}
 	authenticated.Use(middleware.AuthMiddleware(jwtSecret))
 	{
 		// Profile (SRS 3.3)
@@ -50,18 +58,20 @@ func SetupRoutes(
 		authenticated.PATCH("/me/requests/:id/cancel", productRequestController.Cancel)
 	}
 
-	router.GET(
-		"/api/products",
-		productController.GetActiveProducts,
-	)
-
-	router.GET(
-		"/api/products/:id",
-		productController.GetActiveByID,
-	)
+	// Public catalog routes with general API rate limiting (SRS 22)
+	if apiLimiter != nil {
+		router.GET("/api/products", middleware.RateLimitMiddleware(apiLimiter), productController.GetActiveProducts)
+		router.GET("/api/products/:id", middleware.RateLimitMiddleware(apiLimiter), productController.GetActiveByID)
+	} else {
+		router.GET("/api/products", productController.GetActiveProducts)
+		router.GET("/api/products/:id", productController.GetActiveByID)
+	}
 
 	admin := router.Group("/api/admin")
 
+	if apiLimiter != nil {
+		admin.Use(middleware.RateLimitMiddleware(apiLimiter))
+	}
 	admin.Use(
 		middleware.AuthMiddleware(jwtSecret),
 		middleware.RequireRole("admin"),
