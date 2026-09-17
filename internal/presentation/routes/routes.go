@@ -18,9 +18,11 @@ func SetupRoutes(
 	productImageController *controllers.ProductImageController,
 	productRequestController *controllers.ProductRequestController,
 	dashboardController *controllers.DashboardController,
+	sizeController *controllers.SizeController,
 	jwtSecret string,
 	authLimiter *middleware.IPRateLimiter,
 	apiLimiter *middleware.IPRateLimiter,
+	uploadPath string,
 ) {
 
 	router.GET("/health", func(c *gin.Context) {
@@ -29,7 +31,11 @@ func SetupRoutes(
 		})
 	})
 
-	router.Static("/uploads", "./uploads")
+	staticDir := uploadPath
+	if staticDir == "" {
+		staticDir = "./uploads"
+	}
+	router.Static("/uploads", staticDir)
 
 	auth := router.Group("/api/auth")
 	if authLimiter != nil {
@@ -62,9 +68,17 @@ func SetupRoutes(
 	if apiLimiter != nil {
 		router.GET("/api/products", middleware.RateLimitMiddleware(apiLimiter), productController.GetActiveProducts)
 		router.GET("/api/products/:id", middleware.RateLimitMiddleware(apiLimiter), productController.GetActiveByID)
+		router.GET("/api/categories", middleware.RateLimitMiddleware(apiLimiter), categoryController.GetAll)
+		router.GET("/api/materials", middleware.RateLimitMiddleware(apiLimiter), materialController.GetAll)
+		router.GET("/api/colors", middleware.RateLimitMiddleware(apiLimiter), colorController.GetAll)
+		router.GET("/api/sizes", middleware.RateLimitMiddleware(apiLimiter), sizeController.GetAll)
 	} else {
 		router.GET("/api/products", productController.GetActiveProducts)
 		router.GET("/api/products/:id", productController.GetActiveByID)
+		router.GET("/api/categories", categoryController.GetAll)
+		router.GET("/api/materials", materialController.GetAll)
+		router.GET("/api/colors", colorController.GetAll)
+		router.GET("/api/sizes", sizeController.GetAll)
 	}
 
 	admin := router.Group("/api/admin")

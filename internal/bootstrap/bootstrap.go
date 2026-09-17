@@ -78,6 +78,14 @@ func Start() {
 	// Size
 	sizeRepository := repositories.NewSizeRepository(db)
 
+	sizeService := services.NewSizeService(
+		sizeRepository,
+	)
+
+	sizeController := controllers.NewSizeController(
+		sizeService,
+	)
+
 	// Product
 	productRepository := repositories.NewProductRepository(db)
 
@@ -119,6 +127,7 @@ func Start() {
 		productRepository,
 		localStorage,
 		cfg.BaseURL,
+		cfg.UploadPath,
 	)
 
 	productImageController := controllers.NewProductImageController(
@@ -172,9 +181,11 @@ func Start() {
 		productImageController,
 		productRequestController,
 		dashboardController,
+		sizeController,
 		cfg.JWTSecret,
 		authLimiter,
 		apiLimiter,
+		cfg.UploadPath,
 	)
 
 	err := router.Run(

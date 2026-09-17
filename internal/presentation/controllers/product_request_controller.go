@@ -78,7 +78,13 @@ func (c *ProductRequestController) GetMyRequests(
 		})
 		return
 	}
-	userID := userIDVal.(uint)
+	userID, ok := userIDVal.(uint)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "invalid user session",
+		})
+		return
+	}
 
 	page, err := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	if err != nil || page < 1 {
@@ -120,7 +126,13 @@ func (c *ProductRequestController) GetMyRequestByID(
 		})
 		return
 	}
-	userID := userIDVal.(uint)
+	userID, ok := userIDVal.(uint)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "invalid user session",
+		})
+		return
+	}
 
 	id, err := parseUint(ctx.Param("id"))
 	if err != nil {
@@ -154,7 +166,13 @@ func (c *ProductRequestController) Cancel(
 		})
 		return
 	}
-	userID := userIDVal.(uint)
+	userID, ok := userIDVal.(uint)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "invalid user session",
+		})
+		return
+	}
 
 	id, err := parseUint(ctx.Param("id"))
 	if err != nil {
@@ -265,7 +283,13 @@ func (c *ProductRequestController) UpdateStatus(
 		})
 		return
 	}
-	adminID := adminIDVal.(uint)
+	adminID, ok := adminIDVal.(uint)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "invalid user session",
+		})
+		return
+	}
 
 	id, err := parseUint(ctx.Param("id"))
 	if err != nil {

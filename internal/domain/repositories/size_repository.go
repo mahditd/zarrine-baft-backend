@@ -6,4 +6,5 @@ type SizeRepository interface {
 	FindByID(
 		id uint,
 	) (*models.Size, error)
+	FindAll() ([]models.Size, error)
 }

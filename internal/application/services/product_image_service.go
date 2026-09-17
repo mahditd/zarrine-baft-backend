@@ -18,6 +18,7 @@ type ProductImageService struct {
 	productRepository      repositories.ProductRepository
 	storage                storage.Storage
 	baseURL                string
+	uploadPath             string
 }
 
 func NewProductImageService(
@@ -25,6 +26,7 @@ func NewProductImageService(
 	productRepository repositories.ProductRepository,
 	fileStorage storage.Storage,
 	baseURL string,
+	uploadPath string,
 ) *ProductImageService {
 
 	return &ProductImageService{
@@ -32,12 +34,42 @@ func NewProductImageService(
 		productRepository:      productRepository,
 		storage:                fileStorage,
 		baseURL:                baseURL,
+		uploadPath:             uploadPath,
 	}
 }
 
 type UploadProductImageInput struct {
 	ProductID uint
 	File      *multipart.FileHeader
+}
+
+// imageURLFor builds the public URL for a stored file.
+// Files live under uploadPath (served at /uploads), so the URL is derived
+// from the path relative to uploadPath — never from the absolute disk path
+// (which breaks under Docker, e.g. /app/uploads/...).
+func (s *ProductImageService) imageURLFor(fsPath string) string {
+	rel := ""
+
+	if s.uploadPath != "" {
+		if r, err := filepath.Rel(s.uploadPath, fsPath); err == nil &&
+			r != "." &&
+			r != ".." &&
+			!strings.HasPrefix(r, ".."+string(filepath.Separator)) {
+			rel = filepath.ToSlash(r)
+		}
+	}
+
+	if rel == "" {
+		rel = "products/" + filepath.ToSlash(filepath.Base(fsPath))
+	}
+
+	url := "/uploads/" + strings.TrimPrefix(rel, "/")
+
+	if s.baseURL != "" {
+		url = strings.TrimSuffix(s.baseURL, "/") + url
+	}
+
+	return url
 }
 
 func validateImageFile(file *multipart.FileHeader) (string, error) {
@@ -112,11 +144,7 @@ func (s *ProductImageService) Upload(
 		return nil, err
 	}
 
-	imageURL := "/" + filepath.ToSlash(path)
-
-	if s.baseURL != "" {
-		imageURL = s.baseURL + imageURL
-	}
+	imageURL := s.imageURLFor(path)
 
 	image := &models.ProductImage{
 		ProductID: input.ProductID,
@@ -228,10 +256,7 @@ func (s *ProductImageService) Replace(
 		return nil, err
 	}
 
-	newURL := "/" + filepath.ToSlash(newPath)
-	if s.baseURL != "" {
-		newURL = s.baseURL + newURL
-	}
+	newURL := s.imageURLFor(newPath)
 
 	oldPath := image.FilePath
 	image.FilePath = newPath

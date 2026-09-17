@@ -113,7 +113,13 @@ func (c *AuthController) GetProfile(ctx *gin.Context) {
 		})
 		return
 	}
-	userID := userIDVal.(uint)
+	userID, ok := userIDVal.(uint)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "invalid user session",
+		})
+		return
+	}
 
 	user, err := c.authService.GetProfile(userID)
 	if err != nil {
@@ -145,7 +151,13 @@ func (c *AuthController) UpdateProfile(ctx *gin.Context) {
 		})
 		return
 	}
-	userID := userIDVal.(uint)
+	userID, ok := userIDVal.(uint)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "invalid user session",
+		})
+		return
+	}
 
 	var request updateProfileRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {

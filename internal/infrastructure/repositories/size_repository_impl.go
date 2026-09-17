@@ -36,3 +36,19 @@ func (r *SizeRepositoryImpl) FindByID(
 
 	return &size, nil
 }
+
+func (r *SizeRepositoryImpl) FindAll() ([]models.Size, error) {
+
+	var sizes []models.Size
+
+	err := r.db.
+		Order("id ASC").
+		Find(&sizes).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return sizes, nil
+}

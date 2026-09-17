@@ -2,6 +2,8 @@ package config
 
 import (
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -59,6 +61,13 @@ func Load() *Config {
 		adminName = "Super Admin"
 	}
 
+	expireHours := 24
+	if raw := strings.TrimSpace(os.Getenv("JWT_EXPIRE_HOURS")); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil && n > 0 {
+			expireHours = n
+		}
+	}
+
 	return &Config{
 		AppPort: appPort,
 
@@ -69,7 +78,7 @@ func Load() *Config {
 		DBName:     os.Getenv("DB_NAME"),
 
 		JWTSecret:      os.Getenv("JWT_SECRET"),
-		JWTExpireHours: 24,
+		JWTExpireHours: expireHours,
 		UploadPath:     uploadPath,
 		BaseURL:        os.Getenv("BASE_URL"),
 		ClientURL:      clientURL,
